@@ -1,0 +1,139 @@
+/* =========================
+   GLOBAL RESET (LAYOUT SCOPE)
+========================= */
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: #ffffff;
+  color: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* =========================
+   HR LAYOUT CONTAINER
+========================= */
+.hr-container {
+  display: flex;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* =========================
+   FIXED SIDEBAR
+========================= */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  background: linear-gradient(180deg, #0b2c8a, #08174a);
+  color: #ffffff;
+  padding: 24px;
+}
+
+.sidebar h2 {
+  margin: 0 0 36px 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* =========================
+   SIDEBAR MENU
+========================= */
+.sidebar ul {
+  padding: 0;
+  margin: 0;
+}
+
+.sidebar li {
+  list-style: none;
+  padding: 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  margin-bottom: 6px;
+  font-size: 14px;  
+}
+
+.sidebar li:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.sidebar li.active {
+  background: rgba(255, 255, 255, 0.25);
+  border-left: 4px solid #ffffff;
+  padding-left: 10px;
+}
+
+/* =========================
+   MAIN CONTENT AREA
+========================= */
+.content {
+  margin-left: 240px; /* same as sidebar width */
+  width: calc(100% - 240px);
+  min-height: 100vh;
+  padding: 28px 36px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* =========================
+   TOPBAR (GLOBAL)
+========================= */
+.topbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.topbar span {
+  margin-right: 24px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.topbar button {
+  height: 28px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 2px solid #0b2c8a;
+  background: transparent;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.topbar button:hover {
+  background: #0b2c8a;
+  color: white;
+}
+
+/* =========================
+   PAGE SLOT (CONTENT HOLDER)
+   (NO STYLING – STRUCTURE ONLY)
+========================= */
+.main-content > *:not(.topbar) {
+  width: 100%;
+}
+
+/* =========================
+   RESPONSIVE (LAYOUT ONLY)
+========================= */
+@media (max-width: 1100px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
+  .main-content {
+    margin-left: 0;
+    width: 100%;
+  }
+}
