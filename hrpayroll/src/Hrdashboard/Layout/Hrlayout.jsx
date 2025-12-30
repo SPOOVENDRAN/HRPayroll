@@ -1,10 +1,10 @@
 import { useState } from "react";
 import "./HrLayout.css";
-import Dashboard from "./Dashboard/Dashboard";
-import Employees from "./Employees/Employees";
-import AttendanceAndLeaves from "./AttendanceAndLeaves/AttendanceAndLeaves";
-import Payroll from "./Payroll/Payroll";
-import Holidays from "./Holidays/Holidays";
+import Dashboard from "../Dashboard/Dashboard";
+import Employees from "../Employees/Employees";
+import AttendanceAndLeaves from "../AttendanceAndLeaves/AttendanceAndLeaves";
+import Payroll from "../Payroll/Payroll";
+import Holidays from "../Holidays/Holidays";
 
 const HrLayout = () => {
   const [page, setPage] = useState("dashboard");
