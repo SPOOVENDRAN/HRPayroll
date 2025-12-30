@@ -1,16 +1,19 @@
-import { useState } from 'react'
-import './App.css'
-import Login from './Login/Login.jsx'
-import Hrdashboard from './Hrdashboard/Hrlayout.jsx'
-import Employee from './Employee/EmployeeLayout.jsx'
-import AdminDashboard from './admin/AdminDashboard.jsx'
+import { BrowserRouter, createBrowserRouter, Route, RouterProvider, Routes } from "react-router-dom";
+import EmployeeData from "./Employee/EmployeeDashboard/EmployeeData.jsx";
+let router = createBrowserRouter([
+  {
+    path:"/:empid",
+    element:<EmployeeData/>
+  }
+])
+
 function App() {
- 
   return (
-    <>
-      <AdminDashboard/>
-    </>
-  )
+  <>
+    <RouterProvider  router = {router}/>
+    { <EmployeeData/> }
+   </>
+  );
 }
 
-export default App
+export default App;

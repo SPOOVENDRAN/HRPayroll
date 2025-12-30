@@ -1,15 +1,16 @@
 import { useState } from "react";
 import "./EmployeeLayout.css";
 
-import EmployeeDashboard from "./EmployeeDashoard/EmployeeDashboard";
+import EmployeeDashboard from "./EmployeeDashboard/EmployeeDashboard";
 import EmployeeLeaves from "./EmployeeLeave/EmployeeLeaves";
 import EmployeeSalary from "./EmployeeSalary/EmployeeSalary";
+import EmployeeData from "./EmployeeDashboard/EmployeeData";
 
 const EmployeeLayout = () => {
   const [page, setPage] = useState("dashboard");
 
   const pages = {
-    dashboard: <EmployeeDashboard />,
+    dashboard: <EmployeeData />,
     leaves: <EmployeeLeaves />,
     salary: <EmployeeSalary />
   };
