@@ -1,13 +1,8 @@
 package com.example.Backend.Employees.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import com.example.Backend.Employees.DTO.EmployeeDashboardDTO;
 import com.example.Backend.Employees.Entity.Employee;
 import com.example.Backend.Employees.Repository.EmployeeRepo;
@@ -19,20 +14,20 @@ import com.example.Backend.Employees.Service.EmployeeService;
 public class EmployeeController {
 
     @Autowired
-    private EmployeeService employeeService;
+    private EmployeeService dashboardService;
 
     @Autowired
     private EmployeeRepo employeeRepo;
 
+    // ✅ DASHBOARD (READ-ONLY AGGREGATION)
     @GetMapping("/dashboard")
     public EmployeeDashboardDTO getDashboard(@RequestParam String empid) {
-        return employeeService.getDashboard(empid);
+        return dashboardService.getDashboard(empid);
     }
 
+    // ✅ EMPLOYEE CREATE (CRUD)
     @PostMapping("/add")
     public Employee addEmployee(@RequestBody Employee emp) {
         return employeeRepo.save(emp);
     }
-
 }
-

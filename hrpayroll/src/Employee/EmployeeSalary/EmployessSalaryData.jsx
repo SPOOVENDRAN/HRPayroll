@@ -22,7 +22,7 @@ const EmployeeSalaryData = () => {
 
       const data = await res.json();
 
-      // 🔴 HARD GUARD
+      // 🔒 HARD GUARD
       if (!data || !data.salary) {
         console.error("Invalid salary response:", data);
         return;
@@ -30,7 +30,7 @@ const EmployeeSalaryData = () => {
 
       const s = data.salary;
 
-      // ✅ MAP BACKEND → UI FIELD NAMES
+      // ✅ MAIN SALARY (SINGLE MONTH ONLY)
       setSalaryData({
         basicPay: s.basicPay ?? 0,
         hra: s.hra ?? 0,
@@ -50,11 +50,11 @@ const EmployeeSalaryData = () => {
         daysPresent: s.daysPresent ?? 0,
         paymentDate: s.paymentDate,
 
-        overtimeHours: 10,
-        bankAccount: "XXXXXX4567" // frontend-only
+        overtimeHours: 10, // frontend-only (for now)
+        bankAccount: "XXXXXX4567"
       });
 
-      // ✅ HISTORY
+      // ✅ HISTORY (FOR DROPDOWN + TABLE ONLY)
       setPayslipHistory(
         Array.isArray(data.history)
           ? data.history.map(h => ({
@@ -73,7 +73,9 @@ const EmployeeSalaryData = () => {
   };
 
   useEffect(() => {
-    if (empid) fetchSalary(selectedMonth);
+    if (empid) {
+      fetchSalary(selectedMonth);
+    }
   }, [empid]);
 
   if (!salaryData) {

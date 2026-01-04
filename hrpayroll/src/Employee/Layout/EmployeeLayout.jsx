@@ -1,18 +1,8 @@
-import { useState } from "react";
+import { NavLink, Outlet, useParams } from "react-router-dom";
 import "./EmployeeLayout.css";
 
-import EmployeeData from "../EmployeeDashboard/EmployeeData";
-import EmployeeLeavesData from "../EmployeeLeave/EmployeeLeavesData";
-import EmployeeSalaryData from "../EmployeeSalary/EmployessSalaryData";
-
 const EmployeeLayout = () => {
-  const [page, setPage] = useState("dashboard");
-
-  const pages = {
-    dashboard: <EmployeeData />,
-    leaves: <EmployeeLeavesData  />,
-    salary: <EmployeeSalaryData/>
-  };
+  const { empid } = useParams();
 
   return (
     <div className="employee-container">
@@ -20,33 +10,40 @@ const EmployeeLayout = () => {
       <aside className="employee-sidebar">
         <h2>Employee Portal</h2>
         <ul>
-          <li
-            className={page === "dashboard" ? "active" : ""}
-            onClick={() => setPage("dashboard")}
-          >
-            Dashboard
+          <li>
+            <NavLink
+              to={`/employee/${empid}/dashboard`}
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
+              Dashboard
+            </NavLink>
           </li>
-          <li
-            className={page === "leaves" ? "active" : ""}
-            onClick={() => setPage("leaves")}
-          >
-            Leaves
+
+          <li>
+            <NavLink
+              to={`/employee/${empid}/leaves`}
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
+              Leaves
+            </NavLink>
           </li>
-          <li
-            className={page === "salary" ? "active" : ""}
-            onClick={() => setPage("salary")}
-          >
-            Salary
+
+          <li>
+            <NavLink
+              to={`/employee/${empid}/salary`}
+              className={({ isActive }) => (isActive ? "active" : "")}
+            >
+              Salary
+            </NavLink>
           </li>
-          <li className="employee-logout">
-            Logout
-          </li>
+
+          <li className="employee-logout">Logout</li>
         </ul>
       </aside>
 
       {/* MAIN */}
       <main className="employee-main">
-        {pages[page]}
+        <Outlet />
       </main>
     </div>
   );

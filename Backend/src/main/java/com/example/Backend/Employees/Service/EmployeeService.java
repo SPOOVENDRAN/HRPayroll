@@ -1,14 +1,11 @@
 package com.example.Backend.Employees.Service;
 
-import java.time.LocalDate;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.Backend.Employees.DTO.EmployeeDashboardDTO;
 import com.example.Backend.Employees.Entity.Attendance;
 import com.example.Backend.Employees.Entity.Employee;
-import com.example.Backend.Employees.Entity.Leave;
 import com.example.Backend.Employees.Entity.Salary;
 import com.example.Backend.Employees.Repository.AttendanceRepo;
 import com.example.Backend.Employees.Repository.EmployeeRepo;
@@ -33,41 +30,45 @@ public class EmployeeService {
     public EmployeeDashboardDTO getDashboard(String empid) {
 
         Employee employee = employeeRepo.findByEmpid(empid);
+        if (employee == null) {
+            throw new RuntimeException("Employee not found");
+        }
 
-        Leave leave = leaveRepo.findByEmpid(empid).orElse(null);
-        int leaveBalance = leave.getTotalLeaves() - leave.getUsedLeaves();
+        // ✅ LEAVE SUMMARY
+        int approvedLeaveDays = leaveRepo.getApprovedLeaveDays(empid);
+        int pendingRequests = leaveRepo.countByEmpidAndStatus(empid, "PENDING");
 
+        int totalAnnualLeave = 24;
+        int leaveBalance = totalAnnualLeave - approvedLeaveDays;
+
+        // ✅ ATTENDANCE
         Attendance attendance =
-            attendanceRepo.findByEmpidAndMonth(empid, getCurrentMonth());
+                attendanceRepo.findTopByEmpidOrderByMonthDesc(empid);
 
+        int presentDays = attendance != null ? attendance.getPresentDays() : 0;
+        int totalDays = attendance != null ? attendance.getTotalDays() : 0;
+        int overtimeHours = attendance != null ? attendance.getOvertimeHours() : 0;
+
+        // ✅ SALARY
         Salary salary =
-            salaryRepo.findTopByEmpidOrderByIdDesc(empid);
+                salaryRepo.findTopByEmpidOrderByPaymentDateDesc(empid);
 
+        int lastMonthSalary = salary != null ? salary.getNetPay() : 0;
+
+        // ✅ BUILD DTO
         EmployeeDashboardDTO dto = new EmployeeDashboardDTO();
-
         dto.setEmployee(employee);
         dto.setLeaveBalance(leaveBalance);
-        dto.setPresentDays(attendance.getPresentDays());
-        dto.setTotalDays(attendance.getTotalDays());
-        dto.setLastMonthSalary(salary.getAmount());
-        dto.setSalaryMonth(salary.getMonth());
+        dto.setPendingRequests(pendingRequests);
+        dto.setPresentDays(presentDays);
+        dto.setTotalDays(totalDays);
+        dto.setOvertimeHours(overtimeHours);
+        dto.setLastMonthSalary(lastMonthSalary);
 
-        // temporary / calculated values
-        dto.setOvertimeHours(8);
-        dto.setPendingRequests(1);
-        dto.setActiveProjects(3);
-
-        int attendancePercent =
-            (attendance.getPresentDays() * 100) / attendance.getTotalDays();
-        dto.setAttendanceScore(attendancePercent);
-        dto.setProductivity(85);
-        dto.setGoalAchievement(92);
+        // ✅ FROM EMPLOYEE ENTITY (NO MAGIC NUMBERS)
+        dto.setProductivity(employee.getProductivityRate());
+        dto.setGoalAchievement(employee.getGoalAchievement());
 
         return dto;
     }
-
-    private String getCurrentMonth() {
-        return LocalDate.now().getMonth().name();
-    }
 }
-

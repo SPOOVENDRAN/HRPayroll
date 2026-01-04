@@ -16,8 +16,10 @@ public class Attendance {
 
     private String empid;
     private String month;
+
     private int presentDays;
     private int totalDays;
 
-    // getters & setters
+    // ✅ NEW
+    private int overtimeHours;
 }

@@ -5,6 +5,7 @@ body {
   margin: 0;
   font-family: "Segoe UI", sans-serif;
 }
+
 .employee-container {
   display: flex;
   min-height: 100vh;
@@ -12,13 +13,17 @@ body {
   font-family: "Segoe UI", sans-serif;
 }
 
-.employee-logout{
-  margin-top:510px;
+/* LOGOUT */
+.employee-logout {
+  margin-top: 510px;
   position: fixed;
 }
-/* SIDEBAR */
+
+/* =========================
+   SIDEBAR
+========================= */
 .employee-sidebar {
-  position: fixed;            
+  position: fixed;
   left: 0;
   top: 0;
   width: 220px;
@@ -40,26 +45,36 @@ body {
 
 .employee-sidebar li {
   list-style: none;
-  padding: 12px;
   margin-bottom: 6px;
   border-radius: 8px;
-  cursor: pointer;
 }
 
-.employee-sidebar li:hover {
+/* NAVLINK (a tag) */
+.employee-sidebar a {
+  display: block;
+  padding: 12px;
+  border-radius: 8px;
+  color: white;
+  text-decoration: none;
+}
+
+/* HOVER */
+.employee-sidebar a:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 
-.employee-sidebar li.active {
+/* ACTIVE ROUTE */
+.employee-sidebar a.active {
   background: rgba(255, 255, 255, 0.25);
   border-left: 4px solid white;
   padding-left: 10px;
 }
 
-/* MAIN CONTENT */
+/* =========================
+   MAIN CONTENT
+========================= */
 .employee-main {
   flex: 1;
-  padding:  0px 36px;
-  margin-left: 240px;  
+  padding: 0px 36px;
+  margin-left: 240px;
 }
-

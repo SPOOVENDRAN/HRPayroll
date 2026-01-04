@@ -6,24 +6,33 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Data;
+
 @Entity
 @Data
 public class Employee {
-    @GeneratedValue()
+
     @Id
-    Long id;
+    @GeneratedValue
+    private Long id;
+
     @Column(unique = true)
-    String empid;
-    String name;
-    String email;
-    String phone;
-    String department;
-    String designation;
-    String manager;
-    String location;
-    LocalDate joiningDate;
-    String employmentType;
-    Integer experience;
-    Integer curr_projects;
-    Integer total_projects;
+    private String empid;
+
+    private String name;
+    private String email;
+    private String phone;
+    private String department;
+    private String designation;
+    private String manager;
+    private String location;
+    private LocalDate joiningDate;
+    private String employmentType;
+
+    private Integer experience;
+    private Integer curr_projects;
+    private Integer total_projects;
+
+    // ✅ NEW (PERSISTENT KPIs)
+    private int productivityRate;     // example: 85 (%)
+    private int goalAchievement;      // example: 90 (%)
 }

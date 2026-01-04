@@ -119,7 +119,7 @@ const EmployeeDashboard = (props) => {
                 <span className="stat-label">Projects</span>
               </div>
               <div className="profile-stat">
-                <span className="stat-number">{props.overtimeHours}</span>
+                <span className="stat-number">{props.overtime}</span>
                 <span className="stat-label">Overtime Hours</span>
               </div>
             </div>
