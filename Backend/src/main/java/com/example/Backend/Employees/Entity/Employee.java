@@ -23,4 +23,7 @@ public class Employee {
     String location;
     LocalDate joiningDate;
     String employmentType;
+    Integer experience;
+    Integer curr_projects;
+    Integer total_projects;
 }
