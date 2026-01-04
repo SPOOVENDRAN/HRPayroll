@@ -1,18 +1,17 @@
 import { useState } from "react";
 import "./EmployeeLayout.css";
 
-import EmployeeDashboard from "../EmployeeDashboard/EmployeeDashboard";
-import EmployeeLeaves from "../EmployeeLeave/EmployeeLeaves";
-import EmployeeSalary from "../EmployeeSalary/EmployeeSalary";
 import EmployeeData from "../EmployeeDashboard/EmployeeData";
+import EmployeeLeavesData from "../EmployeeLeave/EmployeeLeavesData";
+import EmployeeSalaryData from "../EmployeeSalary/EmployessSalaryData";
 
 const EmployeeLayout = () => {
   const [page, setPage] = useState("dashboard");
 
   const pages = {
     dashboard: <EmployeeData />,
-    leaves: <EmployeeLeaves />,
-    salary: <EmployeeSalary />
+    leaves: <EmployeeLeavesData  />,
+    salary: <EmployeeSalaryData/>
   };
 
   return (
@@ -39,16 +38,14 @@ const EmployeeLayout = () => {
           >
             Salary
           </li>
+          <li className="employee-logout">
+            Logout
+          </li>
         </ul>
       </aside>
 
       {/* MAIN */}
       <main className="employee-main">
-        <header className="employee-topbar">
-          <span>Employee</span>
-          <button>Logout</button>
-        </header>
-
         {pages[page]}
       </main>
     </div>

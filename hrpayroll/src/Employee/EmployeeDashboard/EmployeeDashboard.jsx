@@ -2,18 +2,7 @@ import { useState, useEffect } from "react";
 import "./EmployeeDashboard.css";
 
 const EmployeeDashboard = (props) => {
-  
-  // State for dashboard stats
-  const [stats, setStats] = useState({
-    leaveBalance: 12,
-    attendance: { present: 22, total: 26 },
-    lastSalary: 45000,
-    upcomingHolidays: 2,
-    pendingRequests: 1,
-    overtimeHours: 8,
-    projects: 3,
-    yearsOfService: 1
-  });
+
 
   // State for upcoming holidays
   const [holidays, setHolidays] = useState([
@@ -35,10 +24,10 @@ const EmployeeDashboard = (props) => {
   }, []);
 
   // Calculate attendance percentage
-  const attendancePercentage = Math.round((stats.attendance.present / stats.attendance.total) * 100);
+  const attendancePercentage = Math.round((props.presentDays / props.totalDays) * 100);
 
   // Format salary with commas
-  const formattedSalary = stats.lastSalary.toLocaleString('en-IN');
+  const formattedSalary = props.salary.toLocaleString('en-IN');
 
   // Calculate years of service
   const calculateServiceYears = () => {
@@ -122,15 +111,15 @@ const EmployeeDashboard = (props) => {
             {/* Quick Stats */}
             <div className="profile-stats">
               <div className="profile-stat">
-                <span className="stat-number">{stats.yearsOfService}+</span>
+                <span className="stat-number">{props.yearsOfService}+</span>
                 <span className="stat-label">Years</span>
               </div>
               <div className="profile-stat">
-                <span className="stat-number">{stats.projects}</span>
+                <span className="stat-number">{props.projects}</span>
                 <span className="stat-label">Projects</span>
               </div>
               <div className="profile-stat">
-                <span className="stat-number">{stats.overtimeHours}</span>
+                <span className="stat-number">{props.overtimeHours}</span>
                 <span className="stat-label">Overtime Hours</span>
               </div>
             </div>
@@ -166,7 +155,7 @@ const EmployeeDashboard = (props) => {
                 <div className="card-icon">📅</div>
                 <div className="card-content">
                   <p className="card-label">Leave Balance</p>
-                  <h3 className="card-value">{stats.leaveBalance} Days</h3>
+                  <h3 className="card-value">{props.leaveBalance} Days</h3>
                   <p className="card-detail">Available for use</p>
                 </div>
               </div>
@@ -175,7 +164,7 @@ const EmployeeDashboard = (props) => {
                 <div className="card-icon">✅</div>
                 <div className="card-content">
                   <p className="card-label">Attendance This Month</p>
-                  <h3 className="card-value">{stats.attendance.present}/{stats.attendance.total}</h3>
+                  <h3 className="card-value">{props.presentDays}/{props.totalDays}</h3>
                   <p className="card-detail">{attendancePercentage}% Present</p>
                 </div>
               </div>
@@ -197,21 +186,21 @@ const EmployeeDashboard = (props) => {
               <div className="additional-icon">⏰</div>
               <div className="additional-content">
                 <span className="additional-label">Overtime Hours</span>
-                <span className="additional-value">{stats.overtimeHours} hrs</span>
+                <span className="additional-value">{props.overtime} hrs</span>
               </div>
             </div>
             <div className="additional-stat">
               <div className="additional-icon">📋</div>
               <div className="additional-content">
                 <span className="additional-label">Pending Requests</span>
-                <span className="additional-value">{stats.pendingRequests}</span>
+                <span className="additional-value">{props.pendingRequests}</span>
               </div>
             </div>
             <div className="additional-stat">
               <div className="additional-icon">🎯</div>
               <div className="additional-content">
                 <span className="additional-label">Active Projects</span>
-                <span className="additional-value">{stats.projects}</span>
+                <span className="additional-value">{props.projects}</span>
               </div>
             </div>
           </div>
@@ -273,16 +262,16 @@ const EmployeeDashboard = (props) => {
               <div className="performance-item">
                 <div className="performance-label">Productivity</div>
                 <div className="performance-bar">
-                  <div className="performance-fill" style={{ width: '85%' }}></div>
+                  <div className="performance-fill" style={{ width: `${props.productivity}` }}></div>
                 </div>
-                <div className="performance-value">85%</div>
+                <div className="performance-value">{props.productivity} </div>
               </div>
               <div className="performance-item">
                 <div className="performance-label">Goal Achievement</div>
                 <div className="performance-bar">
-                  <div className="performance-fill" style={{ width: '92%' }}></div>
+                  <div className="performance-fill" style={{ width: `${props.goalAchievement}` }}></div>
                 </div>
-                <div className="performance-value">92%</div>
+                <div className="performance-value">{props.goalAchievement}</div>
               </div>
             </div>
           </div>

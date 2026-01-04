@@ -1,19 +1,32 @@
-import { BrowserRouter, createBrowserRouter, Route, RouterProvider, Routes } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import EmployeeLayout from "./Employee/Layout/EmployeeLayout.jsx";
 import EmployeeData from "./Employee/EmployeeDashboard/EmployeeData.jsx";
-let router = createBrowserRouter([
+import EmployeeLeavesData from "./Employee/EmployeeLeave/EmployeeLeavesData.jsx";
+import EmployeeSalaryData from "./Employee/EmployeeSalary/EmployessSalaryData.jsx";
+
+const router = createBrowserRouter([
   {
-    path:"/:empid",
-    element:<EmployeeData/>
-  }
-])
+    path: "/employee/:empid",
+    element: <EmployeeLayout />,
+    children: [
+      {
+        path: "dashboard",
+        element: <EmployeeData />,
+      },
+      {
+        path: "leaves",
+        element: <EmployeeLeavesData />,
+      },
+      {
+        path: "salary",
+        element: <EmployeeSalaryData />,
+      },
+    ],
+  },
+]);
 
 function App() {
-  return (
-  <>
-    <RouterProvider  router = {router}/>
-    { <EmployeeData/> }
-   </>
-  );
+  return <RouterProvider router={router} />;
 }
 
 export default App;

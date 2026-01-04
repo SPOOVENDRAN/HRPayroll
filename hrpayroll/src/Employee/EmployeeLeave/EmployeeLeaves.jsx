@@ -1,64 +1,19 @@
 import { useState, useEffect } from "react";
 import "./EmployeeLeaves.css";
 
-const EmployeeLeaves = () => {
-  // State for leave balance
-  const [leaveBalance, setLeaveBalance] = useState({
-    sick: { total: 12, used: 2, remaining: 10 },
-    casual: { total: 8, used: 1, remaining: 7 },
-    earned: { total: 15, used: 5, remaining: 10 },
-    maternity: { total: 180, used: 0, remaining: 180 },
-    paternity: { total: 7, used: 0, remaining: 7 }
-  });
+const EmployeeLeaves = ({
+  empid,
+  leaveBalances = [],
+  leaveApplications = [],
+  totalApplications = 0,
+  approvedLeaves = 0,
+  pendingLeavesCount = 0,
+  totalDaysTaken = 0,
+  refreshLeaves
+}) => {
+  const [activeTab, setActiveTab] = useState("history");
+  const [showApplyForm, setShowApplyForm] = useState(false);
 
-  // State for leave applications
-  const [leaveApplications, setLeaveApplications] = useState([
-    { 
-      id: 1, 
-      from: "2024-01-10", 
-      to: "2024-01-12", 
-      type: "Sick Leave", 
-      status: "Approved", 
-      days: 3,
-      reason: "High fever and doctor consultation",
-      appliedOn: "2024-01-05",
-      approvedBy: "HR Manager"
-    },
-    { 
-      id: 2, 
-      from: "2024-02-20", 
-      to: "2024-02-21", 
-      type: "Casual Leave", 
-      status: "Pending", 
-      days: 2,
-      reason: "Family function",
-      appliedOn: "2024-02-15"
-    },
-    { 
-      id: 3, 
-      from: "2024-03-01", 
-      to: "2024-03-05", 
-      type: "Earned Leave", 
-      status: "Approved", 
-      days: 5,
-      reason: "Vacation trip",
-      appliedOn: "2024-02-20",
-      approvedBy: "Team Lead"
-    },
-    { 
-      id: 4, 
-      from: "2024-02-28", 
-      to: "2024-02-28", 
-      type: "Casual Leave", 
-      status: "Rejected", 
-      days: 1,
-      reason: "Personal work",
-      appliedOn: "2024-02-25",
-      rejectedReason: "Project deadline approaching"
-    }
-  ]);
-
-  // State for new leave application
   const [newLeave, setNewLeave] = useState({
     type: "",
     from: "",
@@ -67,133 +22,111 @@ const EmployeeLeaves = () => {
     contact: ""
   });
 
-  // State for active tab
-  const [activeTab, setActiveTab] = useState("history");
-  const [showApplyForm, setShowApplyForm] = useState(false);
-
-  // Format date to display as "10 Jan"
-  const formatDateDisplay = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
-  };
-
-  // Format full date
-  const formatFullDate = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short',
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric' 
+  // 🔁 Format leave balance for UI
+  const leaveBalance = {};
+  if (Array.isArray(leaveBalances)) {
+    leaveBalances.forEach(lb => {
+      const key = lb.leaveType.toLowerCase();
+      leaveBalance[key] = {
+        total: lb.totalLeaves,
+        used: lb.usedLeaves,
+        remaining: lb.totalLeaves - lb.usedLeaves
+      };
     });
-  };
+  }
 
-  // Calculate number of days between two dates
+  // 🔁 Derived lists (✅ FIXED – LOGIC ONLY)
+  const upcomingLeaves = leaveApplications.filter(
+    l => new Date(l.from) > new Date() && l.status === "Approved"
+  );
+
+  const pendingLeaves = leaveApplications.filter(
+    l => l.status === "Pending"
+  );
+
+  // 🔹 Utils
+  const formatDateDisplay = (date) =>
+    new Date(date).toLocaleDateString("en-US", { day: "numeric", month: "short" });
+
+  const formatFullDate = (date) =>
+    new Date(date).toLocaleDateString("en-US", {
+      weekday: "short",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+
   const calculateDays = (from, to) => {
     const start = new Date(from);
     const end = new Date(to);
-    const diffTime = Math.abs(end - start);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-    return diffDays;
+    return Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
   };
 
-  // Handle new leave form input changes
+  // 🔹 Input change
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewLeave({
-      ...newLeave,
-      [name]: value
-    });
+    setNewLeave({ ...newLeave, [e.target.name]: e.target.value });
   };
 
-  // Handle leave application submission
-  const handleApplyLeave = (e) => {
+  // 🔹 APPLY LEAVE (POST)
+  const handleApplyLeave = async (e) => {
     e.preventDefault();
-    
-    // Validate form
+
     if (!newLeave.type || !newLeave.from || !newLeave.to || !newLeave.reason) {
-      alert("Please fill in all required fields");
+      alert("Please fill all required fields");
       return;
     }
 
-    const days = calculateDays(newLeave.from, newLeave.to);
-    
-    // Check if enough leave balance
-    const leaveType = newLeave.type.toLowerCase().replace(' leave', '');
-    if (leaveBalance[leaveType] && leaveBalance[leaveType].remaining < days) {
-      alert(`Insufficient ${newLeave.type} balance. Available: ${leaveBalance[leaveType].remaining} days`);
-      return;
-    }
-
-    // Create new leave application
-    const newApplication = {
-      id: leaveApplications.length + 1,
-      from: newLeave.from,
-      to: newLeave.to,
-      type: newLeave.type,
-      status: "Pending",
-      days: days,
+    const payload = {
+      empid,
+      leaveType: newLeave.type.toUpperCase().replace(" LEAVE", ""),
+      fromDate: newLeave.from,
+      toDate: newLeave.to,
       reason: newLeave.reason,
-      appliedOn: new Date().toISOString().split('T')[0]
+      emergencyContact: newLeave.contact
     };
 
-    // Add to applications
-    setLeaveApplications([newApplication, ...leaveApplications]);
-    
-    // Update leave balance (in real app, this would be backend)
-    if (leaveBalance[leaveType]) {
-      setLeaveBalance({
-        ...leaveBalance,
-        [leaveType]: {
-          ...leaveBalance[leaveType],
-          used: leaveBalance[leaveType].used + days
-        }
-      });
-    }
-
-    // Reset form
-    setNewLeave({
-      type: "",
-      from: "",
-      to: "",
-      reason: "",
-      contact: ""
+    const res = await fetch("http://localhost:8080/employee/apply", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
     });
-    
-    setShowApplyForm(false);
-    alert("Leave application submitted successfully!");
-  };
 
-  // Handle leave cancellation
-  const handleCancelLeave = (id) => {
-    if (window.confirm("Are you sure you want to cancel this leave application?")) {
-      const updatedApplications = leaveApplications.map(app => {
-        if (app.id === id && app.status === "Pending") {
-          return { ...app, status: "Cancelled" };
-        }
-        return app;
-      });
-      setLeaveApplications(updatedApplications);
-      alert("Leave application cancelled");
+    if (res.ok) {
+      alert("Leave applied successfully");
+      setShowApplyForm(false);
+      setNewLeave({ type: "", from: "", to: "", reason: "", contact: "" });
+      refreshLeaves();
+    } else {
+      const msg = await res.text();
+      alert(msg);
     }
   };
 
-  // Calculate upcoming leaves
-  const upcomingLeaves = leaveApplications.filter(leave => 
-    new Date(leave.from) > new Date() && leave.status === "Approved"
-  );
+  // 🔹 CANCEL LEAVE (PUT)
+  const handleCancelLeave = async (id) => {
+    if (!window.confirm("Cancel this leave request?")) return;
 
-  // Calculate pending leaves
-  const pendingLeaves = leaveApplications.filter(leave => 
-    leave.status === "Pending"
-  );
+    const res = await fetch(
+  `http://localhost:8080/employee/cancel/${id}`,
+  { method: "PUT" }
+);
+
+
+    if (res.ok) {
+      alert("Leave cancelled");
+      refreshLeaves();
+    } else {
+      const msg = await res.text();
+      alert(msg);
+    }
+  };
 
   return (
     <div className="leaves-container">
       {/* Header Section */}
       <div className="leaves-header">
         <h2>My Leaves</h2>
-        <button 
+        <button
           className="apply-leave-btn"
           onClick={() => setShowApplyForm(true)}
         >
@@ -207,15 +140,19 @@ const EmployeeLeaves = () => {
         <div className="balance-cards">
           {Object.entries(leaveBalance).map(([type, data]) => (
             <div key={type} className={`balance-card ${type}`}>
-              <div className="balance-type">{type.charAt(0).toUpperCase() + type.slice(1)}</div>
+              <div className="balance-type">
+                {type.charAt(0).toUpperCase() + type.slice(1)}
+              </div>
               <div className="balance-numbers">
                 <span className="balance-used">{data.used}</span>
                 <span className="balance-slash">/</span>
                 <span className="balance-total">{data.total}</span>
               </div>
-              <div className="balance-remaining">{data.remaining} days left</div>
+              <div className="balance-remaining">
+                {data.remaining} days left
+              </div>
               <div className="balance-progress">
-                <div 
+                <div
                   className="progress-bar"
                   style={{ width: `${(data.used / data.total) * 100}%` }}
                 ></div>
@@ -228,21 +165,21 @@ const EmployeeLeaves = () => {
       {/* Navigation Tabs */}
       <div className="tabs-container">
         <div className="tabs">
-          <button 
-            className={`tab ${activeTab === 'history' ? 'active' : ''}`}
-            onClick={() => setActiveTab('history')}
+          <button
+            className={`tab ${activeTab === "history" ? "active" : ""}`}
+            onClick={() => setActiveTab("history")}
           >
             📋 Leave History
           </button>
-          <button 
-            className={`tab ${activeTab === 'upcoming' ? 'active' : ''}`}
-            onClick={() => setActiveTab('upcoming')}
+          <button
+            className={`tab ${activeTab === "upcoming" ? "active" : ""}`}
+            onClick={() => setActiveTab("upcoming")}
           >
             📅 Upcoming ({upcomingLeaves.length})
           </button>
-          <button 
-            className={`tab ${activeTab === 'pending' ? 'active' : ''}`}
-            onClick={() => setActiveTab('pending')}
+          <button
+            className={`tab ${activeTab === "pending" ? "active" : ""}`}
+            onClick={() => setActiveTab("pending")}
           >
             ⏳ Pending ({pendingLeaves.length})
           </button>
