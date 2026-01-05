@@ -4,9 +4,10 @@ const EmployeeSalary = ({
   salaryData,
   payslipHistory,
   selectedMonth,
-  onMonthChange,
-  empId
+  onMonthChange
 }) => {
+  const token = localStorage.getItem("token");
+
   if (!salaryData) {
     return <div>Loading salary...</div>;
   }
@@ -15,7 +16,7 @@ const EmployeeSalary = ({
   const formatCurrency = (amount) =>
     "₹" + amount.toLocaleString("en-IN");
 
-  // Calculate totals (UI-side verification)
+  // Calculate totals
   const totalEarnings =
     salaryData.basicPay +
     salaryData.hra +
@@ -42,11 +43,39 @@ const EmployeeSalary = ({
     onMonthChange(month.toUpperCase().replace(" ", "-"));
   };
 
-  const handleDownloadPayslip = () => {
-    window.open(
-      `http://localhost:8080/employee/salary/payslip?empid=${empId}&month=${selectedMonth}`,
-      "_blank"
-    );
+  // ✅ JWT-SECURED PAYSLIP DOWNLOAD (FIXED)
+  const handleDownloadPayslip = async (month) => {
+    try {
+      const res = await fetch(
+        `http://localhost:8080/employee/salary/payslip?month=${month}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      if (!res.ok) {
+        alert("Failed to download payslip");
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `payslip-${month}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Payslip download error:", err);
+      alert("Error downloading payslip");
+    }
   };
 
   return (
@@ -63,13 +92,14 @@ const EmployeeSalary = ({
               <option key={i}>{p.month}</option>
             ))}
           </select>
-          <button className="download-btn" onClick={handleDownloadPayslip}>
+          <button
+            className="download-btn"
+            onClick={() => handleDownloadPayslip(selectedMonth)}
+          >
             📄 Download Payslip
           </button>
         </div>
       </div>
-
-      {/* EVERYTHING BELOW IS YOUR ORIGINAL UI – UNCHANGED */}
 
       {/* Salary Overview */}
       <div className="salary-overview">
@@ -153,9 +183,8 @@ const EmployeeSalary = ({
                 <button
                   className="download-small"
                   onClick={() =>
-                    window.open(
-                      `http://localhost:8080/employee/salary/payslip?empid=${empId}&month=${p.month.toUpperCase().replace(" ", "-")}`,
-                      "_blank"
+                    handleDownloadPayslip(
+                      p.month.toUpperCase().replace(" ", "-")
                     )
                   }
                 >

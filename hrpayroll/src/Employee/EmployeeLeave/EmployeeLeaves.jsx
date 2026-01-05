@@ -1,14 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./EmployeeLeaves.css";
 
 const EmployeeLeaves = ({
-  empid,
   leaveBalances = [],
   leaveApplications = [],
-  totalApplications = 0,
-  approvedLeaves = 0,
-  pendingLeavesCount = 0,
-  totalDaysTaken = 0,
   refreshLeaves
 }) => {
   const [activeTab, setActiveTab] = useState("history");
@@ -22,20 +17,19 @@ const EmployeeLeaves = ({
     contact: ""
   });
 
-  // 🔁 Format leave balance for UI
-  const leaveBalance = {};
-  if (Array.isArray(leaveBalances)) {
-    leaveBalances.forEach(lb => {
-      const key = lb.leaveType.toLowerCase();
-      leaveBalance[key] = {
-        total: lb.totalLeaves,
-        used: lb.usedLeaves,
-        remaining: lb.totalLeaves - lb.usedLeaves
-      };
-    });
-  }
+  const token = localStorage.getItem("token");
 
-  // 🔁 Derived lists (✅ FIXED – LOGIC ONLY)
+  // 🔁 Format leave balance
+  const leaveBalance = {};
+  leaveBalances.forEach(lb => {
+    const key = lb.leaveType.toLowerCase();
+    leaveBalance[key] = {
+      total: lb.totalLeaves,
+      used: lb.usedLeaves,
+      remaining: lb.totalLeaves - lb.usedLeaves
+    };
+  });
+
   const upcomingLeaves = leaveApplications.filter(
     l => new Date(l.from) > new Date() && l.status === "Approved"
   );
@@ -44,40 +38,18 @@ const EmployeeLeaves = ({
     l => l.status === "Pending"
   );
 
-  // 🔹 Utils
-  const formatDateDisplay = (date) =>
-    new Date(date).toLocaleDateString("en-US", { day: "numeric", month: "short" });
+  const calculateDays = (from, to) =>
+    Math.ceil((new Date(to) - new Date(from)) / (1000 * 60 * 60 * 24)) + 1;
 
-  const formatFullDate = (date) =>
-    new Date(date).toLocaleDateString("en-US", {
-      weekday: "short",
-      day: "numeric",
-      month: "long",
-      year: "numeric"
-    });
-
-  const calculateDays = (from, to) => {
-    const start = new Date(from);
-    const end = new Date(to);
-    return Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-  };
-
-  // 🔹 Input change
   const handleInputChange = (e) => {
     setNewLeave({ ...newLeave, [e.target.name]: e.target.value });
   };
 
-  // 🔹 APPLY LEAVE (POST)
+  // ✅ APPLY LEAVE (JWT BASED)
   const handleApplyLeave = async (e) => {
     e.preventDefault();
 
-    if (!newLeave.type || !newLeave.from || !newLeave.to || !newLeave.reason) {
-      alert("Please fill all required fields");
-      return;
-    }
-
     const payload = {
-      empid,
       leaveType: newLeave.type.toUpperCase().replace(" LEAVE", ""),
       fromDate: newLeave.from,
       toDate: newLeave.to,
@@ -87,7 +59,10 @@ const EmployeeLeaves = ({
 
     const res = await fetch("http://localhost:8080/employee/apply", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
       body: JSON.stringify(payload)
     });
 
@@ -97,29 +72,44 @@ const EmployeeLeaves = ({
       setNewLeave({ type: "", from: "", to: "", reason: "", contact: "" });
       refreshLeaves();
     } else {
-      const msg = await res.text();
-      alert(msg);
+      alert(await res.text());
     }
   };
 
-  // 🔹 CANCEL LEAVE (PUT)
+  // ✅ CANCEL LEAVE (JWT BASED)
   const handleCancelLeave = async (id) => {
     if (!window.confirm("Cancel this leave request?")) return;
 
     const res = await fetch(
-  `http://localhost:8080/employee/cancel/${id}`,
-  { method: "PUT" }
-);
-
+      `http://localhost:8080/employee/cancel/${id}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
 
     if (res.ok) {
       alert("Leave cancelled");
       refreshLeaves();
     } else {
-      const msg = await res.text();
-      alert(msg);
+      alert(await res.text());
     }
-  };
+  };// 🔹 Date format helpers (FIX)
+const formatDateDisplay = (date) =>
+  new Date(date).toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short"
+  });
+
+const formatFullDate = (date) =>
+  new Date(date).toLocaleDateString("en-US", {
+    weekday: "short",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  });
 
   return (
     <div className="leaves-container">

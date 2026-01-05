@@ -1,50 +1,72 @@
-import { useParams } from "react-router-dom";
 import EmployeeDashboard from "./EmployeeDashboard";
-import { useState , useEffect } from "react";
+import { useState, useEffect } from "react";
 
-function EmployeeData(){
+function EmployeeData() {
 
-    let {empid} = useParams();
-    let [employeeDetail , Setemployeedetails] = useState(null);
-    useEffect( () => {
-        fetch(`http://localhost:8080/employee/dashboard?empid=${empid}`)
-        .then((response) => response.json())
-        .then((data) => {Setemployeedetails(data)})
-        .catch((e) => console.log(e))
-    },[empid]);
+  const [employeeDetail, setEmployeeDetails] = useState(null);
 
-    if(!employeeDetail){
-        return <div>Loading employee data...</div>;
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      console.error("No JWT token found");
+      return;
     }
-    let employeeData = employeeDetail.employee;
-    
-    
-    return(
-        <EmployeeDashboard
-        name={employeeData.name}
-        designation={employeeData.designation}
-        employeeId={employeeData.empid}
-        email={employeeData.email}
-        phone={employeeData.phone}
-        department={employeeData.department}
-        manager={employeeData.manager}
-        location={employeeData.location}
-        joiningDate={employeeData.joiningDate}
-        employmentType={employeeData.employmentType}
-        yearsOfService={employeeData.experience}
-        projects={employeeData.total_projects}
-        overtime={employeeDetail.overtimeHours}
-        salary={employeeDetail.lastMonthSalary}
-        upcomingHolidays={2}
-        pendingRequests={employeeDetail.pendingRequests}
-        leaveBalance={employeeDetail.leaveBalance}
-        goalAchievement={employeeDetail.goalAchievement}
-        presentDays={employeeDetail.presentDays}
-        productivity ={employeeDetail.productivity}
-        salaryMonth={employeeDetail.salaryMonth}
-        totalDays={employeeDetail.totalDays}
+
+    fetch("http://localhost:8080/employee/dashboard", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`, // 🔐 JWT ONLY SOURCE
+      },
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Unauthorized or error fetching dashboard");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setEmployeeDetails(data);
+      })
+      .catch((e) => {
+        console.error("Dashboard fetch error:", e);
+      });
+
+  }, []); // ✅ NO empid dependency
+
+  if (!employeeDetail) {
+    return <div>Loading employee data...</div>;
+  }
+
+  const employeeData = employeeDetail.employee;
+
+  return (
+    <EmployeeDashboard
+      name={employeeData.name}
+      designation={employeeData.designation}
+      employeeId={employeeData.empid}
+      email={employeeData.email}
+      phone={employeeData.phone}
+      department={employeeData.department}
+      manager={employeeData.manager}
+      location={employeeData.location}
+      joiningDate={employeeData.joiningDate}
+      employmentType={employeeData.employmentType}
+      yearsOfService={employeeData.experience}
+      projects={employeeData.total_projects}
+      overtime={employeeDetail.overtimeHours}
+      salary={employeeDetail.lastMonthSalary}
+      upcomingHolidays={2}
+      pendingRequests={employeeDetail.pendingRequests}
+      leaveBalance={employeeDetail.leaveBalance}
+      goalAchievement={employeeDetail.goalAchievement}
+      presentDays={employeeDetail.presentDays}
+      productivity={employeeDetail.productivity}
+      salaryMonth={employeeDetail.salaryMonth}
+      totalDays={employeeDetail.totalDays}
     />
-    )
+  );
 }
 
 export default EmployeeData;

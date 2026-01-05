@@ -2,43 +2,71 @@ package com.example.Backend.Employees.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import com.example.Backend.Employees.Entity.Salary;
 import com.example.Backend.Employees.Service.SalaryService;
+import com.example.Backend.security.JwtUtil;
 
 @RestController
 @RequestMapping("/employee/salary")
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:5173")
 public class SalaryController {
 
     @Autowired
     private SalaryService salaryService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    // 🔹 GET SALARY BY MONTH
     @GetMapping
     public ResponseEntity<?> getEmployeeSalary(
-            @RequestParam String empid,
-            @RequestParam String month
-    ) {
-        System.out.println("SALARY API HIT => empid=" + empid + ", month=" + month);
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam String month) {
+
+        String token = authHeader.substring(7);
+        String empId = jwtUtil.extractEmpId(token);
+
         return ResponseEntity.ok(
-            salaryService.getSalary(empid, month)
+            salaryService.getSalary(empId, month)
         );
     }
-      @GetMapping("/payslip")
+
+    // 🔹 DOWNLOAD PAYSLIP
+    @GetMapping("/payslip")
     public ResponseEntity<byte[]> downloadPayslip(
-            @RequestParam String empid,
-            @RequestParam String month
-    ) {
-        byte[] pdfBytes = salaryService.generatePayslipPdf(empid, month);
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam String month) {
+
+        String token = authHeader.substring(7);
+        String empId = jwtUtil.extractEmpId(token);
+
+        byte[] pdfBytes = salaryService.generatePayslipPdf(empId, month);
 
         return ResponseEntity.ok()
-                .header("Content-Disposition",
-                        "attachment; filename=payslip-" + empid + "-" + month + ".pdf")
-                .header("Content-Type", "application/pdf")
-                .body(pdfBytes);
+            .header(
+                "Content-Disposition",
+                "attachment; filename=payslip-" + empId + "-" + month + ".pdf"
+            )
+            .header("Content-Type", "application/pdf")
+            .body(pdfBytes);
+    }
+
+    // 🔹 GET LATEST SALARY (NEW)
+    @GetMapping("/latest")
+    public ResponseEntity<?> getLatestSalary(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+        String empId = jwtUtil.extractEmpId(token);
+
+        Salary salary = salaryService.getLatestSalary(empId);
+
+        if (salary == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(salary);
     }
 }

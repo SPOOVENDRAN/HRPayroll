@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useParams } from "react-router-dom";
+import { NavLink, Outlet, useParams ,Link} from "react-router-dom";
 import "./EmployeeLayout.css";
 
 const EmployeeLayout = () => {
@@ -37,7 +37,7 @@ const EmployeeLayout = () => {
             </NavLink>
           </li>
 
-          <li className="employee-logout">Logout</li>
+          <Link to= "/"><li className="employee-logout">Logout</li></Link>
         </ul>
       </aside>
 

@@ -1,85 +1,89 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
 import EmployeeSalary from "./EmployeeSalary";
 
-const EmployeeSalaryData = () => {
-  const { empid } = useParams();
-
+const EmployessSalaryData = () => {
   const [salaryData, setSalaryData] = useState(null);
   const [payslipHistory, setPayslipHistory] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState("JANUARY-2024");
+  const [selectedMonth, setSelectedMonth] = useState(null);
+
+  const token = localStorage.getItem("token");
 
   const fetchSalary = async (month) => {
+    if (!token || !month) return;
+
     try {
       const res = await fetch(
-        `http://localhost:8080/employee/salary?empid=${empid}&month=${month}`
+        `http://localhost:8080/employee/salary?month=${month}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
 
       if (!res.ok) {
-        console.error("Salary API failed:", res.status);
+        setSalaryData(null);
         return;
       }
 
       const data = await res.json();
-
-      // 🔒 HARD GUARD
-      if (!data || !data.salary) {
-        console.error("Invalid salary response:", data);
-        return;
-      }
-
       const s = data.salary;
 
-      // ✅ MAIN SALARY (SINGLE MONTH ONLY)
       setSalaryData({
-        basicPay: s.basicPay ?? 0,
-        hra: s.hra ?? 0,
-        conveyanceAllowance: s.conveyance ?? 0,
-        medicalAllowance: s.medical ?? 0,
-        specialAllowance: s.specialAllowance ?? 0,
-        overtimePay: s.overtimePay ?? 0,
-        bonus: s.bonus ?? 0,
-
-        pfDeduction: s.pf ?? 0,
-        professionalTax: s.professionalTax ?? 0,
-        tds: s.tds ?? 0,
-        otherDeductions: s.otherDeductions ?? 0,
-
-        netPay: s.netPay ?? 0,
-        workingDays: s.workingDays ?? 0,
-        daysPresent: s.daysPresent ?? 0,
+        basicPay: s.basicPay,
+        hra: s.hra,
+        conveyanceAllowance: s.conveyance,
+        medicalAllowance: s.medical,
+        specialAllowance: s.specialAllowance,
+        overtimePay: s.overtimePay,
+        bonus: s.bonus,
+        pfDeduction: s.pf,
+        professionalTax: s.professionalTax,
+        tds: s.tds,
+        otherDeductions: s.otherDeductions,
+        netPay: s.netPay,
+        workingDays: s.workingDays,
+        daysPresent: s.daysPresent,
         paymentDate: s.paymentDate,
-
-        overtimeHours: 10, // frontend-only (for now)
-        bankAccount: "XXXXXX4567"
+        overtimeHours: 10,
+        bankAccount: "XXXXXX4567",
       });
 
-      // ✅ HISTORY (FOR DROPDOWN + TABLE ONLY)
       setPayslipHistory(
-        Array.isArray(data.history)
-          ? data.history.map(h => ({
-              month: h.salaryMonth.replace("-", " "),
-              netPay: h.netPay ?? 0,
-              status: h.status,
-              date: h.paymentDate
-            }))
-          : []
+        data.history.map((h) => ({
+          month: h.salaryMonth.replace("-", " "),
+          rawMonth: h.salaryMonth,
+          netPay: h.netPay,
+          status: h.status,
+          date: h.paymentDate,
+        }))
       );
-
-      setSelectedMonth(month);
     } catch (err) {
-      console.error("Salary fetch error:", err);
+      console.error(err);
     }
   };
 
+  /* ✅ FIRST LOAD: fetch latest salary only */
   useEffect(() => {
-    if (empid) {
-      fetchSalary(selectedMonth);
-    }
-  }, [empid]);
+    if (!token) return;
+
+    fetch("http://localhost:8080/employee/salary/latest", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error();
+        return res.json();
+      })
+      .then((data) => {
+        const latestMonth = data.salaryMonth;
+        setSelectedMonth(latestMonth);
+        fetchSalary(latestMonth);
+      })
+      .catch(() => setSalaryData(null));
+  }, []);
 
   if (!salaryData) {
-    return <div>Loading salary...</div>;
+    return <div>No salary data available</div>;
   }
 
   return (
@@ -88,9 +92,8 @@ const EmployeeSalaryData = () => {
       payslipHistory={payslipHistory}
       selectedMonth={selectedMonth}
       onMonthChange={fetchSalary}
-      empId={empid}
     />
   );
 };
 
-export default EmployeeSalaryData;
+export default EmployessSalaryData;

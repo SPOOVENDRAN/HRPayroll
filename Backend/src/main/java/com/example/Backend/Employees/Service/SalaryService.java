@@ -127,4 +127,11 @@ public class SalaryService {
         table.addCell(new PdfPCell(new Phrase(label)));
         table.addCell(new PdfPCell(new Phrase("₹ " + value)));
     }
+    /* =========================
+   LATEST SALARY
+========================= */
+public Salary getLatestSalary(String empid) {
+    return salaryRepository.findTopByEmpidOrderByPaymentDateDesc(empid);
+}
+
 }

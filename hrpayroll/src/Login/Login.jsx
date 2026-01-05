@@ -1,7 +1,54 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Login.css";
 
-function Login () {
+function Login() {
+  const navigate = useNavigate();
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      if (!res.ok) {
+        alert("Invalid login");
+        return;
+      }
+
+      const data = await res.json();
+
+      // 🔐 STORE AUTH DATA
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("empId", data.empId);
+
+      // 🚀 ROLE + EMPID BASED REDIRECT
+      if (data.role === "ADMIN") {
+        navigate("/admin");
+      } else if (data.role === "HR") {
+        navigate("/hr");
+      } else {
+        // ✅ EMPLOYEE → OWN DASHBOARD ONLY
+        navigate(`/employee/${data.empId}`);
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
+  };
+
   return (
     <div className="login-page">
       <div className="login-container">
@@ -15,29 +62,31 @@ function Login () {
           <div className="login-card">
             <h3>Login to your account</h3>
 
-            <label>Employee ID</label>
-            <input type="" placeholder="Enter your ID" />
-
             <label>Email</label>
-            <input type="email" placeholder="Enter your email" />
+            <input
+              type="email"
+              placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
 
-            <div className="password-row">
-              <label>Password</label>
-              <span className="forgot">Forgot?</span>
-            </div>
-            <input type="password" placeholder="Enter your password" />
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
 
-            <button className="login-btn">Login now</button>
-
-            <p className="signup-text">
-              Don’t have an account? <span>Sign up</span>
-            </p>
+            <button className="login-btn" onClick={handleLogin}>
+              Login now
+            </button>
           </div>
         </div>
 
       </div>
     </div>
   );
-};
+}
 
 export default Login;

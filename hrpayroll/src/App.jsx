@@ -1,10 +1,23 @@
 import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+
+import Login from "./Login/Login.jsx";
+
 import EmployeeLayout from "./Employee/Layout/EmployeeLayout.jsx";
 import EmployeeData from "./Employee/EmployeeDashboard/EmployeeData.jsx";
 import EmployeeLeavesData from "./Employee/EmployeeLeave/EmployeeLeavesData.jsx";
 import EmployeeSalaryData from "./Employee/EmployeeSalary/EmployessSalaryData.jsx";
-import Hrlayout from "./Hrdashboard/Layout/Hrlayout.jsx"
+
+import Hrlayout from "./Hrdashboard/Layout/Hrlayout.jsx";
+import AdminDashboard from "./admin/AdminDashboard.jsx";
+
 const router = createBrowserRouter([
+  // 🔐 LOGIN
+  {
+    path: "/",
+    element: <Login />,
+  },
+
+  // 🧑‍💼 EMPLOYEE
   {
     path: "/employee/:empid",
     element: <EmployeeLayout />,
@@ -27,11 +40,22 @@ const router = createBrowserRouter([
       },
     ],
   },
+
+  // 👨‍💼 HR
+  {
+    path: "/hr",
+    element: <Hrlayout />,
+  },
+
+  // 🛡 ADMIN
+  {
+    path: "/admin",
+    element: <AdminDashboard />,
+  },
 ]);
 
 function App() {
-   return <RouterProvider router={router} />;
-  // return <Hrlayout/>
+  return <RouterProvider router={router} />;
 }
 
 export default App;

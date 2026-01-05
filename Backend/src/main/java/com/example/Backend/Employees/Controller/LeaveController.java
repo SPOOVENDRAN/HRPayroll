@@ -2,46 +2,54 @@ package com.example.Backend.Employees.Controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.Backend.Employees.DTO.ApplyLeaveDTO;
 import com.example.Backend.Employees.DTO.EmployeeLeavesResponse;
 import com.example.Backend.Employees.Service.LeaveService;
+import com.example.Backend.security.JwtUtil;
+
 @RestController
 @RequestMapping("/employee")
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:5173")
 public class LeaveController {
 
     @Autowired
     private LeaveService leaveService;
 
-    // Apply Leave
-    @PostMapping("/apply")
-    public ResponseEntity<String> applyLeave(
-            @RequestBody ApplyLeaveDTO dto
-    ) {
+    @Autowired
+    private JwtUtil jwtUtil;
 
-    leaveService.applyLeave(dto);
-    return ResponseEntity.ok("Leave applied successfully");
+    // ✅ FETCH LEAVES (JWT BASED)
+    @GetMapping("/leaves")
+    public EmployeeLeavesResponse getEmployeeLeaves(
+            @RequestHeader("Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);
+        String empId = jwtUtil.extractEmpId(token);
+
+        return leaveService.getEmployeeLeaves(empId);
     }
 
-    // Cancel Leave
-   @PutMapping("/cancel/{id}")
+    // ✅ APPLY LEAVE (THIS WAS MISSING)
+    @PostMapping("/apply")
+    public ResponseEntity<String> applyLeave(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody ApplyLeaveDTO dto) {
+
+        String token = authHeader.substring(7);
+        String empId = jwtUtil.extractEmpId(token);
+
+        dto.setEmpId(empId); // 🔐 enforce logged-in employee
+
+        leaveService.applyLeave(dto);
+        return ResponseEntity.ok("Leave applied successfully");
+    }
+
+    // ✅ CANCEL LEAVE
+    @PutMapping("/cancel/{id}")
     public ResponseEntity<String> cancelLeave(@PathVariable Long id) {
         leaveService.cancelLeave(id);
         return ResponseEntity.ok("Leave cancelled successfully");
     }
-   @GetMapping("/leaves")
-    public EmployeeLeavesResponse getEmployeeLeaves(@RequestParam String empid) {
-        return leaveService.getEmployeeLeaves(empid);
-    }
-
 }

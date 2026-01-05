@@ -4,9 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.Backend.Employees.DTO.EmployeeDashboardDTO;
-import com.example.Backend.Employees.Entity.Employee;
-import com.example.Backend.Employees.Repository.EmployeeRepo;
 import com.example.Backend.Employees.Service.EmployeeService;
+import com.example.Backend.security.JwtUtil;
 
 @RestController
 @RequestMapping("/employee")
@@ -17,17 +16,16 @@ public class EmployeeController {
     private EmployeeService dashboardService;
 
     @Autowired
-    private EmployeeRepo employeeRepo;
+    private JwtUtil jwtUtil;
 
-    // ✅ DASHBOARD (READ-ONLY AGGREGATION)
     @GetMapping("/dashboard")
-    public EmployeeDashboardDTO getDashboard(@RequestParam String empid) {
-        return dashboardService.getDashboard(empid);
-    }
+    public EmployeeDashboardDTO getDashboard(
+            @RequestHeader("Authorization") String authHeader) {
 
-    // ✅ EMPLOYEE CREATE (CRUD)
-    @PostMapping("/add")
-    public Employee addEmployee(@RequestBody Employee emp) {
-        return employeeRepo.save(emp);
+        String token = authHeader.substring(7);
+        String empId = jwtUtil.extractEmpId(token);
+
+        return dashboardService.getDashboard(empId);
     }
 }
+
