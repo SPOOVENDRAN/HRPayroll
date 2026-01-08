@@ -64,6 +64,22 @@ body {
   border-left: 4px solid #ffffff;
   padding-left: 10px;
 }
+/* LOGOUT */
+.hr-logout {
+  margin-top: 400px;
+  position: fixed;
+  outline: none;
+  border: none;
+  background-color: #001043;
+  color: #f4f6fb;
+}
+.hr-logout:hover{
+  background: rgba(255, 255, 255, 0.25);
+  border-left: 4px solid white;
+  margin-bottom: 6px;
+  border-radius: 5px;
+  width: 70px;
+}
 
 /* =========================
    MAIN CONTENT AREA

@@ -1,20 +1,30 @@
 import { useState } from "react";
 import "./HrLayout.css";
-import Dashboard from "../Dashboard/Dashboard";
 import Employees from "../Employees/Employees";
 import AttendanceAndLeaves from "../AttendanceAndLeaves/AttendanceAndLeaves";
 import Payroll from "../Payroll/Payroll";
 import Holidays from "../Holidays/Holidays";
+import HrDashboardData from "../Dashboard/DataFetches/HrDashboardData";
+import { useNavigate } from "react-router-dom";
+import HrEmployeesData from "../Employees/HrEmployeesData";
+import AttendanceAndLeavesData from "../AttendanceAndLeaves/AttendanceAndLeavesData";
+import PayrollData from "../Payroll/PayrollData";
+
 
 const HrLayout = () => {
+   const navigate = useNavigate(); 
+    const handleLogout = () => {
+      localStorage.clear();   // ✅ clear JWT, role, empId
+      navigate("/", { replace: true });
+    };
   const [page, setPage] = useState("dashboard");
 
   const pages = {
-    dashboard: <Dashboard />,
-    employees: <Employees />,
-    attendenceandleaves: <AttendanceAndLeaves/>,
-    payroll: <Payroll />,
-    holidays: <Holidays />
+    dashboard: <HrDashboardData/>,
+    employees: <HrEmployeesData />,
+    attendenceandleaves: <AttendanceAndLeavesData/>,
+    payroll: <PayrollData />,
+    holidays: <Holidays/>
   };
 
   const menuItems = [
@@ -37,14 +47,12 @@ const HrLayout = () => {
             </li>
           ))}
         </ul>
+         <button onClick={handleLogout} className="hr-logout"> Logout</button>
       </aside>
 
       {/* MAIN CONTENT */}
       <main className="content">
-        <header className="topbar">
-          <span>HR User</span>
-          <button>Logout</button>
-        </header>
+        
 
         {pages[page]}
       </main>

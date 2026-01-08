@@ -225,7 +225,7 @@ const EmployeeDashboard = (props) => {
             </div>
           </div>
 
-          {/* Quick Actions */}
+          { "EMPLOYEE" && (
           <div className="info-card">
             <h4>🚀 Quick Actions</h4>
             <div className="quick-actions">
@@ -247,6 +247,8 @@ const EmployeeDashboard = (props) => {
               </button>
             </div>
           </div>
+        )}
+
 
           {/* Performance Summary */}
           <div className="info-card performance-card">

@@ -17,6 +17,17 @@ body {
 .employee-logout {
   margin-top: 510px;
   position: fixed;
+  outline: none;
+  border: none;
+  background-color: #08174a;
+  color: #f4f6fb;
+}
+.employee-logout:hover{
+  background: rgba(255, 255, 255, 0.25);
+  border-left: 4px solid white;
+  margin-bottom: 6px;
+  border-radius: 5px;
+  width: 70px;
 }
 
 /* =========================

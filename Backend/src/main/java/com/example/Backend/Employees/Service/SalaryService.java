@@ -4,14 +4,14 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.example.Backend.Employees.Entity.Employee;
 import com.example.Backend.Employees.Entity.Salary;
+import com.example.Backend.Employees.Repository.EmployeeRepo;
 import com.example.Backend.Employees.Repository.SalaryRepo;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.Font;
@@ -21,38 +21,37 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
+@RequiredArgsConstructor
 public class SalaryService {
 
-    @Autowired
-    private SalaryRepo salaryRepository;
+    private final SalaryRepo salaryRepository;
+    private final EmployeeRepo employeeRepo;
 
     /* =========================
        SALARY PAGE DATA
     ========================= */
-   public Map<String, Object> getSalary(String empid, String month) {
+    public Map<String, Object> getSalary(String empid, String month) {
 
-    Optional<Salary> salaryOpt =
-        salaryRepository.findByEmpidAndSalaryMonth(empid, month);
+        Salary salary = salaryRepository
+                .findByEmpidAndSalaryMonth(empid, month)
+                .orElseThrow(() ->
+                        new ResponseStatusException(
+                                HttpStatus.NOT_FOUND,
+                                "Salary not available for selected month"
+                        )
+                );
 
-    if (salaryOpt.isEmpty()) {
-        throw new ResponseStatusException(
-            HttpStatus.NOT_FOUND,
-            "Salary not available for selected month"
-        );
+        List<Salary> history =
+                salaryRepository.findByEmpidOrderByPaymentDateDesc(empid);
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("salary", salary);
+        res.put("history", history);
+        return res;
     }
-
-    Salary salary = salaryOpt.get();
-
-    List<Salary> history =
-        salaryRepository.findByEmpidOrderByPaymentDateDesc(empid);
-
-    Map<String, Object> res = new HashMap<>();
-    res.put("salary", salary);
-    res.put("history", history);
-
-    return res;
-}
 
     /* =========================
        DASHBOARD SUPPORT
@@ -60,78 +59,73 @@ public class SalaryService {
     public int getLastMonthNetPay(String empid) {
 
         Salary salary =
-            salaryRepository.findTopByEmpidOrderByPaymentDateDesc(empid);
+                salaryRepository.findTopByEmpidOrderByPaymentDateDesc(empid);
 
         return salary != null ? salary.getNetPay() : 0;
     }
 
     /* =========================
-       PAYSLIP PDF
+       PAYSLIP PDF (EMP + HR)
     ========================= */
     public byte[] generatePayslipPdf(String empid, String month) {
 
-        Salary salary =
-            salaryRepository
+        Salary salary = salaryRepository
                 .findByEmpidAndSalaryMonth(empid, month)
                 .orElseThrow(() ->
-                    new RuntimeException("Salary not found")
+                        new RuntimeException("Salary not found")
                 );
+
+        Employee emp = employeeRepo.findByEmpid(empid);
+        if (emp == null) {
+            throw new RuntimeException("Employee not found");
+        }
 
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            Document document = new Document();
-            PdfWriter.getInstance(document, out);
+            Document doc = new Document();
+            PdfWriter.getInstance(doc, out);
 
-            document.open();
+            doc.open();
 
-            Font titleFont = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
-            Font normalFont = new Font(Font.FontFamily.HELVETICA, 12);
+            Font title = new Font(Font.FontFamily.HELVETICA, 18, Font.BOLD);
+            Font normal = new Font(Font.FontFamily.HELVETICA, 12);
 
-            document.add(new Paragraph("Payslip", titleFont));
-            document.add(new Paragraph("Employee ID: " + empid, normalFont));
-            document.add(new Paragraph("Salary Month: " + month, normalFont));
-            document.add(new Paragraph(" "));
+            doc.add(new Paragraph("PAYSLIP", title));
+            doc.add(new Paragraph(" "));
+            doc.add(new Paragraph("Employee Name: " + emp.getName(), normal));
+            doc.add(new Paragraph("Employee ID: " + emp.getEmpid(), normal));
+            doc.add(new Paragraph("Department: " + emp.getDepartment(), normal));
+            doc.add(new Paragraph("Salary Month: " + month, normal));
+            doc.add(new Paragraph(" "));
 
             PdfPTable table = new PdfPTable(2);
             table.setWidthPercentage(100);
 
             addRow(table, "Basic Pay", salary.getBasicPay());
-            addRow(table, "HRA", salary.getHra());
-            addRow(table, "Conveyance", salary.getConveyance());
-            addRow(table, "Medical", salary.getMedical());
-            addRow(table, "Special Allowance", salary.getSpecialAllowance());
             addRow(table, "Overtime Pay", salary.getOvertimePay());
-            addRow(table, "Bonus", salary.getBonus());
-
-            addRow(table, "PF", salary.getPf());
-            addRow(table, "Professional Tax", salary.getProfessionalTax());
-            addRow(table, "TDS", salary.getTds());
-            addRow(table, "Other Deductions", salary.getOtherDeductions());
-
+            addRow(table, "Total Deductions", salary.getTotalDeductions());
             addRow(table, "Net Pay", salary.getNetPay());
 
-            document.add(table);
-            document.close();
+            doc.add(table);
+            doc.close();
 
             return out.toByteArray();
 
         } catch (Exception e) {
-            throw new RuntimeException("Error generating payslip PDF", e);
+            throw new RuntimeException("Payslip generation failed", e);
         }
     }
 
-    /* =========================
-       UTIL
-    ========================= */
     private void addRow(PdfPTable table, String label, int value) {
         table.addCell(new PdfPCell(new Phrase(label)));
         table.addCell(new PdfPCell(new Phrase("₹ " + value)));
     }
-    /* =========================
-   LATEST SALARY
-========================= */
-public Salary getLatestSalary(String empid) {
-    return salaryRepository.findTopByEmpidOrderByPaymentDateDesc(empid);
-}
 
+    /* =========================
+       LATEST SALARY
+    ========================= */
+    public Salary getLatestSalary(String empid) {
+        return salaryRepository.findTopByEmpidOrderByPaymentDateDesc(empid);
+    }
 }
+    

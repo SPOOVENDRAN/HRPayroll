@@ -3,6 +3,8 @@ package com.example.Backend.Employees.Entity;
 import java.time.LocalDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import lombok.Data;
@@ -26,13 +28,20 @@ public class Employee {
     private String manager;
     private String location;
     private LocalDate joiningDate;
-    private String employmentType;
+    @Enumerated(EnumType.STRING)
+    private EmploymentType employmentType;
 
+    private String status;
     private Integer experience;
-    private Integer curr_projects;
-    private Integer total_projects;
+     @Column(name = "curr_projects")
+    private Integer currProjects;
+
+    @Column(name = "total_projects")
+    private Integer totalProjects;
 
     // ✅ NEW (PERSISTENT KPIs)
     private int productivityRate;     // example: 85 (%)
-    private int goalAchievement;      // example: 90 (%)
+    private int goalAchievement;   
+    @Column(nullable = false)      // example: 90 (%)
+    private Boolean deleted = false;;
 }

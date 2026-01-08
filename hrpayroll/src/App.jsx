@@ -8,19 +8,25 @@ import EmployeeLeavesData from "./Employee/EmployeeLeave/EmployeeLeavesData.jsx"
 import EmployeeSalaryData from "./Employee/EmployeeSalary/EmployessSalaryData.jsx";
 
 import Hrlayout from "./Hrdashboard/Layout/Hrlayout.jsx";
-import AdminDashboard from "./admin/AdminDashboard.jsx";
+import AdminDashboardData from "./admin/AdminDashboardData.jsx";
+
+import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
-  // 🔐 LOGIN
+  // 🔐 LOGIN (PUBLIC)
   {
     path: "/",
     element: <Login />,
   },
 
-  // 🧑‍💼 EMPLOYEE
+  // 🧑‍💼 EMPLOYEE (PROTECTED)
   {
     path: "/employee/:empid",
-    element: <EmployeeLayout />,
+    element: (
+      <ProtectedRoute role="EMPLOYEE">
+        <EmployeeLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -41,16 +47,24 @@ const router = createBrowserRouter([
     ],
   },
 
-  // 👨‍💼 HR
+  // 👨‍💼 HR (PROTECTED)
   {
     path: "/hr",
-    element: <Hrlayout />,
+    element: (
+      <ProtectedRoute role="HR">
+        <Hrlayout />
+      </ProtectedRoute>
+    ),
   },
 
-  // 🛡 ADMIN
+  // 🛡 ADMIN (PROTECTED)
   {
     path: "/admin",
-    element: <AdminDashboard />,
+    element: (
+      <ProtectedRoute role="ADMIN">
+        <AdminDashboardData />
+      </ProtectedRoute>
+    ),
   },
 ]);
 

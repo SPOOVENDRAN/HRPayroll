@@ -661,7 +661,7 @@
 
 .attendance-leaves-container .action-buttons-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
   gap: 12px;
 }
 
@@ -694,6 +694,48 @@
   font-weight: 500;
   color: #475569;
 }
+.modal-overlay{
+   position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+.modal{
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  justify-items: center;
+  align-items: center;
+  word-spacing:normal;
+  padding: 10px;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+.Ok-btn{
+  width: 75px;
+  background-color: green;
+  border: none;
+  outline: none;
+  text-align: center;
+  margin-left:250px ;
+  padding: 10px;
+  margin-top: 10px;
+} 
 
 /* Responsive Design */
 @media (max-width: 1024px) {

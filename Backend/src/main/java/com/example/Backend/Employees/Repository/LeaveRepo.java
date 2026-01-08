@@ -37,4 +37,13 @@ public interface LeaveRepo extends JpaRepository<Leave, Long> {
     @Param("empid") String empid,
     @Param("type") String type
 );
+boolean existsByEmpidAndStatusAndFromDateLessThanEqualAndToDateGreaterThanEqual(
+        String empid,
+        String status,
+        java.time.LocalDate from,
+        java.time.LocalDate to
+);
+
+ List<Leave> findByStatus(String status);
+
 }

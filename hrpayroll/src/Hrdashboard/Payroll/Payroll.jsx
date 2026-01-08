@@ -1,35 +1,60 @@
 // Payroll.jsx
 import React, { useState } from 'react';
 import './Payroll.css';
+const Payroll = ({
+  summary,
+  employees,
+  month,
+  setMonth,
+  runPayroll,
+  downloadPayslip,
+  months,
+   locked  
+}) => {
 
-const Payroll = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
 
-  const employees = [
-    { id: 1, name: 'Arun', empId: 'EMP-0001', department: 'IT', basic: '$40,000', deductions: '$2,000', deductionPercent: '5%', net: '$38,000', status: 'Processed' },
-    { id: 2, name: 'Meena', empId: 'EMP-0002', department: 'QA', basic: '$30,000', deductions: '$1,500', deductionPercent: '5%', net: '$28,500', status: 'Processed' },
-    { id: 3, name: 'Rahul', empId: 'EMP-0003', department: 'HR', basic: '$35,000', deductions: '$1,800', deductionPercent: '5.1%', net: '$33,200', status: 'Pending' },
-    { id: 4, name: 'Priya', empId: 'EMP-0004', department: 'Finance', basic: '$45,000', deductions: '$3,000', deductionPercent: '6.7%', net: '$42,000', status: 'Processed' },
-    { id: 5, name: 'Suresh', empId: 'EMP-0005', department: 'IT', basic: '$38,000', deductions: '$2,200', deductionPercent: '5.8%', net: '$35,800', status: 'Pending' },
-  ];
-
-  const payrollStats = {
-    monthlyPayroll: '$5.2L',
-    processedEmployees: '110',
-    pendingPayroll: '10',
-    overtimeAmount: '$45K'
-  };
+  
 
   const filteredEmployees = employees.filter(employee => {
+  const search =
+    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    employee.department.toLowerCase().includes(searchTerm.toLowerCase());
+
+  if (!search) return false;
     if (activeFilter === 'all') return true;
-    if (activeFilter === 'processed') return employee.status === 'Processed';
-    if (activeFilter === 'pending') return employee.status === 'Pending';
-    return true;
-  });
+  if (activeFilter === 'processed') return employee.status === 'Processed';
+  if (activeFilter === 'pending') return employee.status === 'Pending';
+  return true;
+});
 
   const processedCount = employees.filter(e => e.status === 'Processed').length;
   const pendingCount = employees.filter(e => e.status === 'Pending').length;
+
+  const exportReport = () => {
+  const headers = ["Emp ID", "Name", "Department", "Basic", "Deductions", "Net", "Status"];
+
+  const rows = employees.map(e => [
+    e.empId,
+    e.name,
+    e.department,
+    e.basic,
+    e.deductions,
+    e.net,
+    e.status
+  ]);
+
+  const csv = [headers, ...rows].map(r => r.join(",")).join("\n");
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `Payroll-${month}.csv`;
+  a.click();
+};
 
   return (
     <div className="hr-payroll">
@@ -43,12 +68,15 @@ const Payroll = () => {
         <div className="header-right">
           <div className="month-selector">
             <label>Payroll Month</label>
-            <select defaultValue="February 2024">
-              <option>January 2024</option>
-              <option>February 2024</option>
-              <option>March 2024</option>
-              <option>April 2024</option>
-            </select>
+           <select value={month} onChange={(e) => setMonth(e.target.value)}>
+            {months.map(m => (
+              <option key={m} value={m}>
+                {m.replace("-", " ")}
+              </option>
+            ))}
+          </select>
+
+
           </div>
         </div>
       </div>
@@ -58,9 +86,9 @@ const Payroll = () => {
         <div className="stat-card">
           <div className="stat-header">
             <h3>MONTHLY PAYROLL</h3>
-            <div className="stat-trend positive">+2.5%</div>
+          
           </div>
-          <div className="stat-value">{payrollStats.monthlyPayroll}</div>
+          <div className="stat-value">₹{summary?.monthlyPayroll ?? 0}</div>
           <p className="stat-note">from last month</p>
         </div>
 
@@ -68,7 +96,7 @@ const Payroll = () => {
           <div className="stat-header">
             <h3>PROCESSED EMPLOYEES</h3>
           </div>
-          <div className="stat-value">{payrollStats.processedEmployees}</div>
+          <div className="stat-value">{summary.processedEmployees}</div>
           <p className="stat-note">{processedCount} this month</p>
         </div>
 
@@ -76,16 +104,22 @@ const Payroll = () => {
           <div className="stat-header">
             <h3>PENDING PAYROLL</h3>
           </div>
-          <div className="stat-value">{payrollStats.pendingPayroll}</div>
-          <button className="run-payroll-btn">Run Payroll Now</button>
+          <div className="stat-value">{summary.pendingPayroll}</div>
+          <button
+            className="run-payroll-btn"
+            disabled={locked || summary.pendingPayroll === 0}
+            onClick={runPayroll}
+          >
+            {locked ? "Payroll Completed" : "Run Payroll Now"}
+          </button>
+
         </div>
 
         <div className="stat-card">
           <div className="stat-header">
             <h3>OVERTIME AMOUNT</h3>
-            <div className="stat-trend positive">+15%</div>
           </div>
-          <div className="stat-value">{payrollStats.overtimeAmount}</div>
+          <div className="stat-value">₹{summary.overtimeAmount}</div>
           <p className="stat-note">from last month</p>
         </div>
       </div>
@@ -129,7 +163,7 @@ const Payroll = () => {
               </button>
             </div>
             
-            <button className="export-btn">Export Report</button>
+            <button className="export-btn" onClick={exportReport} >Export Report</button>
           </div>
         </div>
 
@@ -148,7 +182,7 @@ const Payroll = () => {
             </thead>
             <tbody>
               {filteredEmployees.map((employee) => (
-                <tr key={employee.id}>
+                <tr key={employee.empId}>
                   <td>
                     <div className="employee-info">
                       <div className="employee-avatar">
@@ -163,19 +197,24 @@ const Payroll = () => {
                   <td>
                     <span className="dept-badge">{employee.department}</span>
                   </td>
-                  <td className="salary-cell">{employee.basic}</td>
+                  <td className="salary-cell">₹{employee.basic.toLocaleString()}</td>
+
                   <td>
-                    <div className="deduction-amount">{employee.deductions}</div>
-                    <div className="deduction-percent">{employee.deductionPercent}</div>
+                   <div className="deduction-amount">₹{employee.deductions.toLocaleString()}</div>
+                    <div className="deduction-percent">
+                    {((employee.deductions / employee.basic) * 100).toFixed(1)}%
+                  </div>
+
                   </td>
-                  <td className="net-salary">{employee.net}</td>
+                  <td className="net-salary">₹{employee.net.toLocaleString()}</td>
+
                   <td>
                     <span className={`status-badge ${employee.status.toLowerCase()}`}>
                       {employee.status}
                     </span>
                   </td>
                   <td>
-                    <button className="payslip-btn">Payslip</button>
+                    <button className="payslip-btn" onClick={() => downloadPayslip(employee.empId)}>Payslip</button>
                   </td>
                 </tr>
               ))}

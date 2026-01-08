@@ -1,8 +1,13 @@
-import { NavLink, Outlet, useParams ,Link} from "react-router-dom";
+import { NavLink, Outlet, useParams ,useNavigate} from "react-router-dom";
 import "./EmployeeLayout.css";
 
 const EmployeeLayout = () => {
+  const navigate = useNavigate(); 
   const { empid } = useParams();
+  const handleLogout = () => {
+    localStorage.clear();   // ✅ clear JWT, role, empId
+    navigate("/", { replace: true });
+  };
 
   return (
     <div className="employee-container">
@@ -37,7 +42,7 @@ const EmployeeLayout = () => {
             </NavLink>
           </li>
 
-          <Link to= "/"><li className="employee-logout">Logout</li></Link>
+          <button onClick={handleLogout} className="employee-logout"> Logout</button>
         </ul>
       </aside>
 

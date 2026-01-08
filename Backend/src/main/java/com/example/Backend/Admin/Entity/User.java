@@ -1,6 +1,5 @@
 package com.example.Backend.Admin.Entity;
-
-import com.example.Backend.Role;
+import com.example.Backend.security.UserRole;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,8 +24,9 @@ public class User {
   private String email;
   private String password;
 
-  @Enumerated(EnumType.STRING)
-  private Role role;      // ADMIN, HR, EMPLOYEE
+ @Enumerated(EnumType.STRING) 
+@Column(nullable = false)
+  private UserRole role;  // ADMIN, HR, EMPLOYEE
 
   private boolean active = true;
 }

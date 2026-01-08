@@ -1,34 +1,27 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import "./AdminDashboard.css";
 
-const AdminDashboard = () => {
-  // State for active tab
+const AdminDashboard = ({
+  overview,
+  employees = [],
+  hrUsers = [],
+  admins = [],
+  onAddUser,
+  onUpdateEmployee,
+  onToggleStatus,
+  onDeleteEmployee,
+  onToggleHrStatus,
+  onUpdateUser   
+}) => {
+
+  /* ---------------- TAB + SEARCH ---------------- */
   const [activeTab, setActiveTab] = useState("overview");
-  
-  // State for HR Users
-  const [hrUsers, setHrUsers] = useState([
-    { id: 1, name: "Sarah Johnson", email: "sarah.hr@company.com", role: "HR Manager", status: "Active", lastLogin: "2024-01-25 14:30" },
-    { id: 2, name: "Mike Wilson", email: "mike.hr@company.com", role: "HR Executive", status: "Active", lastLogin: "2024-01-24 10:15" },
-    { id: 3, name: "Lisa Brown", email: "lisa.hr@company.com", role: "Payroll Admin", status: "Inactive", lastLogin: "2024-01-20 09:45" },
-    { id: 4, name: "David Lee", email: "david.hr@company.com", role: "Recruitment HR", status: "Active", lastLogin: "2024-01-25 16:20" }
-  ]);
+  const [searchQuery, setSearchQuery] = useState("");
 
-  // State for Employees
-  const [employees, setEmployees] = useState([
-    { id: 101, name: "John Doe", email: "john@company.com", department: "Engineering", role: "Software Engineer", status: "Active" },
-    { id: 102, name: "Jane Smith", email: "jane@company.com", department: "Marketing", role: "Marketing Manager", status: "Active" },
-    { id: 103, name: "Robert Chen", email: "robert@company.com", department: "Sales", role: "Sales Executive", status: "Active" },
-    { id: 104, name: "Maria Garcia", email: "maria@company.com", department: "HR", role: "HR Assistant", status: "Inactive" },
-    { id: 105, name: "Alex Johnson", email: "alex@company.com", department: "Finance", role: "Financial Analyst", status: "Active" }
-  ]);
+  /* ---------------- MODAL + FORM ---------------- */
+  const [showUserForm, setShowUserForm] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
 
-  // State for Admins
-  const [admins, setAdmins] = useState([
-    { id: 1, name: "Admin User", email: "admin@company.com", role: "Super Admin", status: "Active", permissions: "Full Access" },
-    { id: 2, name: "System Admin", email: "system@company.com", role: "System Admin", status: "Active", permissions: "Technical Access" }
-  ]);
-
-  // State for new user form
   const [newUser, setNewUser] = useState({
     type: "employee",
     name: "",
@@ -39,44 +32,12 @@ const AdminDashboard = () => {
     permissions: []
   });
 
-  // State for system overview
-  const [systemOverview, setSystemOverview] = useState({
-    totalUsers: 0,
-    activeUsers: 0,
-    totalEmployees: 0,
-    pendingRequests: 3,
-    systemHealth: "Good"
-  });
-
-  // State for search
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showUserForm, setShowUserForm] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
-
-  // Calculate overview stats
-  useEffect(() => {
-    const totalUsers = hrUsers.length + employees.length + admins.length;
-    const activeUsers = [...hrUsers, ...employees, ...admins].filter(user => user.status === "Active").length;
-    
-    setSystemOverview({
-      totalUsers,
-      activeUsers,
-      totalEmployees: employees.length,
-      pendingRequests: 3,
-      systemHealth: "Good"
-    });
-  }, [hrUsers, employees, admins]);
-
-  // Handle input changes
+  /* ---------------- FORM HANDLERS ---------------- */
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewUser({
-      ...newUser,
-      [name]: value
-    });
+    setNewUser(prev => ({ ...prev, [name]: value }));
   };
 
-  // Handle permission toggle
   const handlePermissionToggle = (permission) => {
     setNewUser(prev => ({
       ...prev,
@@ -86,57 +47,17 @@ const AdminDashboard = () => {
     }));
   };
 
-  // Handle add new user
   const handleAddUser = (e) => {
     e.preventDefault();
-    
-    // Validate form
-    if (!newUser.name || !newUser.email || !newUser.role) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    const newId = Math.max(...[...hrUsers, ...employees, ...admins].map(u => u.id)) + 1;
-    const userData = {
-      id: newId,
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      status: "Active",
-      lastLogin: new Date().toLocaleString(),
-      ...(newUser.type === "employee" && { department: newUser.department }),
-      ...(newUser.type === "admin" && { permissions: newUser.permissions.join(", ") })
-    };
-
-    // Add to appropriate list
-    if (newUser.type === "hr") {
-      setHrUsers([...hrUsers, userData]);
-    } else if (newUser.type === "employee") {
-      setEmployees([...employees, userData]);
-    } else if (newUser.type === "admin") {
-      setAdmins([...admins, userData]);
-    }
-
-    // Reset form
-    setNewUser({
-      type: "employee",
-      name: "",
-      email: "",
-      password: "",
-      department: "",
-      role: "",
-      permissions: []
-    });
-    
+    onAddUser(newUser);
     setShowUserForm(false);
-    alert(`${newUser.type.toUpperCase()} user added successfully!`);
+    setEditingUser(null);
   };
 
-  // Handle edit user
   const handleEditUser = (user, type) => {
     setEditingUser({ ...user, type });
     setNewUser({
-      type: type,
+      type,
       name: user.name,
       email: user.email,
       password: "",
@@ -147,94 +68,52 @@ const AdminDashboard = () => {
     setShowUserForm(true);
   };
 
-  // Handle update user
   const handleUpdateUser = (e) => {
-    e.preventDefault();
-    
-    const updatedUser = {
-      ...editingUser,
-      name: newUser.name,
+  e.preventDefault();
+
+  if (editingUser.type === "hr" || editingUser.type === "admin") {
+    onUpdateUser(editingUser.id, {
       email: newUser.email,
-      role: newUser.role,
-      ...(newUser.type === "employee" && { department: newUser.department }),
-      ...(newUser.type === "admin" && { permissions: newUser.permissions.join(", ") })
-    };
+      active: newUser.active
+    });
+  } else {
+    onUpdateEmployee(editingUser.id, newUser);
+  }
 
-    // Update appropriate list
-    if (editingUser.type === "hr") {
-      setHrUsers(hrUsers.map(user => user.id === editingUser.id ? updatedUser : user));
-    } else if (editingUser.type === "employee") {
-      setEmployees(employees.map(user => user.id === editingUser.id ? updatedUser : user));
-    } else if (editingUser.type === "admin") {
-      setAdmins(admins.map(user => user.id === editingUser.id ? updatedUser : user));
-    }
+  setShowUserForm(false);
+  setEditingUser(null);
+};
 
-    setShowUserForm(false);
-    setEditingUser(null);
-    alert("User updated successfully!");
+
+ const handleToggleStatus = (id, currentStatus) => {
+  const next = currentStatus === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+  onToggleStatus(id, next);
+};
+
+
+  const handleDelete = (id) => {
+    if (!window.confirm("Are you sure you want to delete this employee?")) return;
+    onDeleteEmployee(id);
   };
 
-  // Handle delete user
-  const handleDeleteUser = (id, type) => {
-    if (!window.confirm("Are you sure you want to delete this user?")) return;
+  
 
-    if (type === "hr") {
-      setHrUsers(hrUsers.filter(user => user.id !== id));
-    } else if (type === "employee") {
-      setEmployees(employees.filter(user => user.id !== id));
-    } else if (type === "admin") {
-      setAdmins(admins.filter(user => user.id !== id));
-    }
+  /* ---------------- FILTERS ---------------- */
+  const q = searchQuery.toLowerCase();
 
-    alert("User deleted successfully!");
-  };
-
-  // Handle status toggle
-  const handleToggleStatus = (id, type) => {
-    const toggleFunc = (list) => list.map(user => 
-      user.id === id 
-        ? { ...user, status: user.status === "Active" ? "Inactive" : "Active" }
-        : user
-    );
-
-    if (type === "hr") {
-      setHrUsers(toggleFunc(hrUsers));
-    } else if (type === "employee") {
-      setEmployees(toggleFunc(employees));
-    } else if (type === "admin") {
-      setAdmins(toggleFunc(admins));
-    }
-  };
-
-  // Filter users based on search
-  const filteredHrUsers = hrUsers.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredEmployees = employees.filter(e =>
+    (e.name || "").toLowerCase().includes(q) ||
+    (e.email || "").toLowerCase().includes(q) ||
+    (e.department || "").toLowerCase().includes(q)
   );
 
-  const filteredEmployees = employees.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.department.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredHrUsers = hrUsers.filter(u =>
+    (u.email || "").toLowerCase().includes(q)
   );
 
-  const filteredAdmins = admins.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredAdmins = admins.filter(u =>
+    (u.email || "").toLowerCase().includes(q)
   );
-
-  // Get user type label
-  const getUserTypeLabel = (type) => {
-    switch(type) {
-      case "hr": return "HR User";
-      case "employee": return "Employee";
-      case "admin": return "Admin";
-      default: return "User";
-    }
-  };
-
   return (
     <div className="admin-dashboard">
       {/* Header */}
@@ -248,35 +127,35 @@ const AdminDashboard = () => {
         <div className="stat-card">
           <div className="stat-icon total-users">👥</div>
           <div className="stat-content">
-            <div className="stat-value">{systemOverview.totalUsers}</div>
+            <div className="stat-value">{overview.totalUsers}</div>
             <div className="stat-label">Total Users</div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon active-users">✅</div>
           <div className="stat-content">
-            <div className="stat-value">{systemOverview.activeUsers}</div>
+            <div className="stat-value">{overview.activeUsers}</div>
             <div className="stat-label">Active Users</div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon employees">👨‍💼</div>
           <div className="stat-content">
-            <div className="stat-value">{systemOverview.totalEmployees}</div>
+            <div className="stat-value">{overview.totalEmployees}</div>
             <div className="stat-label">Employees</div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon requests">📋</div>
           <div className="stat-content">
-            <div className="stat-value">{systemOverview.pendingRequests}</div>
+            <div className="stat-value">{overview.pendingRequests}</div>
             <div className="stat-label">Pending Requests</div>
           </div>
         </div>
         <div className="stat-card">
           <div className="stat-icon health">🟢</div>
           <div className="stat-content">
-            <div className="stat-value">{systemOverview.systemHealth}</div>
+            <div className="stat-value">{overview.systemHealth}</div>
             <div className="stat-label">System Health</div>
           </div>
         </div>
@@ -375,16 +254,80 @@ const AdminDashboard = () => {
                       <option value="admin">Admin</option>
                     </select>
                   </div>
-                  
-                  <div className="form-row">
+
+
+
                     <div className="form-group">
-                      <label>Full Name *</label>
+                      <label>Full Name*</label>
                       <input 
                         type="text" 
                         name="name" 
                         value={newUser.name}
                         onChange={handleInputChange}
-                        placeholder="John Doe"
+                        placeholder="Raja"
+                        required
+                      />
+                    </div>
+                  
+                  <div className="form-group">
+                      <label>Employee Id*</label>
+                      <input 
+                        type="text" 
+                        name="empid" 
+                        value={newUser.empid}
+                        onChange={handleInputChange}
+                        placeholder="EMP***"
+                        required
+                      />
+                    </div>
+                  
+                  
+                  <div className="form-row">
+                    
+                    <div className="form-group">
+                      <label>Current projects </label>
+                      <input 
+                        type="number" 
+                        name="current_projects" 
+                        value={newUser.currProjects}
+                        onChange={handleInputChange}
+                        placeholder="Current projects"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Employment Type</label>
+                      <input 
+                        type="text" 
+                        name="EmploymentType" 
+                        value={newUser.employmentType}
+                        onChange={handleInputChange}
+                        placeholder="Full-Time"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Experience </label>
+                      <input 
+                        type="number" 
+                        name="name" 
+                        value={newUser.experience }
+                        onChange={handleInputChange}
+                        placeholder="3"
+                        required
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label> Joining Date </label>
+                      <input 
+                        type="date"
+                        name="Joining Date" 
+                        value={newUser.joiningDate}
+                        onChange={handleInputChange}
+                        placeholder="2000-01-01"
                         required
                       />
                     </div>
@@ -423,7 +366,7 @@ const AdminDashboard = () => {
                       <input 
                         type="text" 
                         name="role" 
-                        value={newUser.role}
+                        value={newUser.designation}
                         onChange={handleInputChange}
                         placeholder={newUser.type === "employee" ? "Software Engineer" : "HR Manager"}
                         required
@@ -493,33 +436,7 @@ const AdminDashboard = () => {
           {/* Overview Tab */}
           {activeTab === "overview" && (
             <div className="overview-content">
-              <div className="recent-activity">
-                <h3>Recent Activity</h3>
-                <div className="activity-list">
-                  <div className="activity-item">
-                    <div className="activity-icon login">👤</div>
-                    <div className="activity-content">
-                      <p>HR User <strong>Sarah Johnson</strong> logged in</p>
-                      <span className="activity-time">2 minutes ago</span>
-                    </div>
-                  </div>
-                  <div className="activity-item">
-                    <div className="activity-icon add">➕</div>
-                    <div className="activity-content">
-                      <p>New employee <strong>Alex Turner</strong> added</p>
-                      <span className="activity-time">1 hour ago</span>
-                    </div>
-                  </div>
-                  <div className="activity-item">
-                    <div className="activity-icon update">✏️</div>
-                    <div className="activity-content">
-                      <p>User permissions updated for <strong>Mike Wilson</strong></p>
-                      <span className="activity-time">3 hours ago</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
+             
               <div className="quick-stats-overview">
                 <h3>Quick Stats</h3>
                 <div className="stats-grid">
@@ -563,7 +480,7 @@ const AdminDashboard = () => {
                     <tr key={user.id}>
                       <td>
                         <div className="user-cell">
-                          <div className="user-avatar">{user.name.charAt(0)}</div>
+                          <div className="user-avatar">{ (user.name || user.empId || "?").charAt(0)}</div>
                           <div className="user-info">
                             <div className="user-name">{user.name}</div>
                             <div className="user-id">HR-{user.id.toString().padStart(3, '0')}</div>
@@ -586,18 +503,25 @@ const AdminDashboard = () => {
                           >
                             ✏️ Edit
                           </button>
-                          <button 
-                            className={`action-btn ${user.status === "Active" ? "deactivate" : "activate"}`}
-                            onClick={() => handleToggleStatus(user.id, "hr")}
-                          >
-                            {user.status === "Active" ? "❌ Deactivate" : "✅ Activate"}
-                          </button>
-                          <button 
+                          <button
+  className={`action-btn ${user.status === "ACTIVE" ? "deactivate" : "activate"}`}
+  onClick={() =>
+    onToggleHrStatus(
+      user.id,
+      user.status !== "ACTIVE"
+    )
+  }
+>
+  {user.status === "ACTIVE" ? "❌ Deactivate" : "✅ Activate"}
+</button>
+
+                          <button
                             className="action-btn delete"
-                            onClick={() => handleDeleteUser(user.id, "hr")}
-                          >
+                            onClick={() => handleDelete(user.id)}
+                            >
                             🗑️ Delete
-                          </button>
+                            </button>
+
                         </div>
                       </td>
                     </tr>
@@ -617,7 +541,7 @@ const AdminDashboard = () => {
                     <th>Employee</th>
                     <th>Email</th>
                     <th>Department</th>
-                    <th>Role</th>
+                    
                     <th>Status</th>
                     <th>Actions</th>
                   </tr>
@@ -636,7 +560,7 @@ const AdminDashboard = () => {
                       </td>
                       <td>{user.email}</td>
                       <td><span className="dept-badge">{user.department}</span></td>
-                      <td>{user.role}</td>
+                      
                       <td>
                         <span className={`status-badge ${user.status.toLowerCase()}`}>
                           {user.status}
@@ -652,16 +576,17 @@ const AdminDashboard = () => {
                           </button>
                           <button 
                             className={`action-btn ${user.status === "Active" ? "deactivate" : "activate"}`}
-                            onClick={() => handleToggleStatus(user.id, "employee")}
+                            onClick={() => handleToggleStatus(user.id, user.status)}
                           >
                             {user.status === "Active" ? "❌ Deactivate" : "✅ Activate"}
                           </button>
-                          <button 
-                            className="action-btn delete"
-                            onClick={() => handleDeleteUser(user.id, "employee")}
-                          >
-                            🗑️ Delete
-                          </button>
+                         <button
+                                className="action-btn delete"
+                                onClick={() => handleDelete(user.id)}
+                                >
+                                🗑️ Delete
+                                </button>
+
                         </div>
                       </td>
                     </tr>
@@ -691,7 +616,7 @@ const AdminDashboard = () => {
                     <tr key={user.id}>
                       <td>
                         <div className="user-cell">
-                          <div className="user-avatar admin-avatar">{user.name.charAt(0)}</div>
+                          <div className="user-avatar admin-avatar">{(user.name || user.empId || "?").charAt(0)}</div>
                           <div className="user-info">
                             <div className="user-name">{user.name}</div>
                             <div className="user-id">ADM-{user.id.toString().padStart(3, '0')}</div>
@@ -720,12 +645,13 @@ const AdminDashboard = () => {
                           >
                             ✏️ Edit
                           </button>
-                          <button 
-                            className={`action-btn ${user.status === "Active" ? "deactivate" : "activate"}`}
-                            onClick={() => handleToggleStatus(user.id, "admin")}
-                          >
-                            {user.status === "Active" ? "❌ Deactivate" : "✅ Activate"}
-                          </button>
+                          <button
+                            className={`action-btn ${user.status === "ACTIVE" ? "deactivate" : "activate"}`}
+                            onClick={() => handleToggleStatus(user.id, user.status)}
+                            >
+                            {user.status === "ACTIVE" ? "❌ Deactivate" : "✅ Activate"}
+                            </button>
+
                         </div>
                       </td>
                     </tr>
