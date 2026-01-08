@@ -1,7 +1,6 @@
 import { useState } from "react";
 import "./HrLayout.css";
-import Employees from "../Employees/Employees";
-import AttendanceAndLeaves from "../AttendanceAndLeaves/AttendanceAndLeaves";
+
 import Payroll from "../Payroll/Payroll";
 import Holidays from "../Holidays/Holidays";
 import HrDashboardData from "../Dashboard/DataFetches/HrDashboardData";
@@ -10,7 +9,7 @@ import HrEmployeesData from "../Employees/HrEmployeesData";
 import AttendanceAndLeavesData from "../AttendanceAndLeaves/AttendanceAndLeavesData";
 import PayrollData from "../Payroll/PayrollData";
 
-//v1
+//v2
 const HrLayout = () => {
    const navigate = useNavigate(); 
     const handleLogout = () => {
