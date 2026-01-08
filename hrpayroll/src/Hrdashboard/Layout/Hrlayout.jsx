@@ -1,7 +1,6 @@
 import { useState } from "react";
-import "./HrLayout.css";
+import "./Hrlayout.css";
 
-import Payroll from "../Payroll/Payroll";
 import Holidays from "../Holidays/Holidays";
 import HrDashboardData from "../Dashboard/DataFetches/HrDashboardData";
 import { useNavigate } from "react-router-dom";
@@ -10,7 +9,7 @@ import AttendanceAndLeavesData from "../AttendanceAndLeaves/AttendanceAndLeavesD
 import PayrollData from "../Payroll/PayrollData";
 
 //v2
-const HrLayout = () => {
+const Hrlayout = () => {
    const navigate = useNavigate(); 
     const handleLogout = () => {
       localStorage.clear();   // ✅ clear JWT, role, empId
@@ -59,4 +58,4 @@ const HrLayout = () => {
   );
 };
 
-export default HrLayout;
+export default Hrlayout;
