@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import EmployeeSalary from "./EmployeeSalary";
+export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 const EmployessSalaryData = () => {
   const [salaryData, setSalaryData] = useState(null);
@@ -13,7 +14,7 @@ const EmployessSalaryData = () => {
 
     try {
       const res = await fetch(
-        `http://localhost:8080/employee/salary?month=${month}`,
+        `${BASE_API_URL}/employee/salary?month=${month}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -67,7 +68,7 @@ const EmployessSalaryData = () => {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:8080/employee/salary/latest", {
+    fetch(`${BASE_API_URL}/employee/salary/latest`, {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {

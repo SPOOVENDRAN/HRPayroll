@@ -1,5 +1,6 @@
 import EmployeeDashboard from "./EmployeeDashboard";
 import { useState, useEffect } from "react";
+export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 function EmployeeData() {
 
@@ -13,7 +14,7 @@ function EmployeeData() {
       return;
     }
 
-    fetch("http://localhost:8080/employee/dashboard", {
+    fetch(`${BASE_API_URL}/employee/dashboard`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

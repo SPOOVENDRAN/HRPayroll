@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AttendanceAndLeaves from "./AttendanceAndLeaves";
+export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 const AttendanceAndLeavesData = () => {
 
@@ -25,7 +26,7 @@ const AttendanceAndLeavesData = () => {
 
       /* 1️⃣ Attendance Summary */
       const summaryRes = await fetch(
-        "http://localhost:8080/hr/attendance/summary",
+        `${BASE_API_URL}/hr/attendance/summary`,
         { headers }
       );
       const summary = await summaryRes.json();
@@ -41,7 +42,7 @@ const AttendanceAndLeavesData = () => {
 
       /* 2️⃣ Daily Attendance */
       const dailyRes = await fetch(
-        "http://localhost:8080/hr/attendance/daily",
+        `${BASE_API_URL}/hr/attendance/daily`,
         { headers }
       );
       const daily = await dailyRes.json();
@@ -64,7 +65,7 @@ const AttendanceAndLeavesData = () => {
 
       /* 3️⃣ Pending Leaves */
       const leaveRes = await fetch(
-        "http://localhost:8080/hr/leaves/pending",
+        `${BASE_API_URL}/hr/leaves/pending`,
         { headers }
       );
       const leaves = await leaveRes.json();
@@ -93,7 +94,7 @@ const AttendanceAndLeavesData = () => {
   =============================== */
   const updateLeaveStatus = async (id, action) => {
     await fetch(
-      `http://localhost:8080/hr/leaves/${id}/${action}`,
+      `${BASE_API_URL}/hr/leaves/${id}/${action}`,
       { method: "PUT", headers }
     );
     fetchAll(); // refresh UI after DB update

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Payroll from "./Payroll";
+export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 const PayrollData = () => {
 
@@ -25,7 +26,7 @@ const PayrollData = () => {
       setLoading(true);
 
       const res = await fetch(
-        `http://localhost:8080/hr/payroll?month=${month}`,
+        `${BASE_API_URL}/hr/payroll?month=${month}`,
         { headers }
       );
 
@@ -59,7 +60,7 @@ const PayrollData = () => {
   const runPayroll = async () => {
   try {
     const res = await fetch(
-      `http://localhost:8080/hr/payroll/run?month=${month}`,
+      `${BASE_API_URL}/hr/payroll/run?month=${month}`,
       { method: "POST", headers }
     );
 
@@ -83,7 +84,7 @@ const PayrollData = () => {
   const downloadPayslip = async (empId) => {
   try {
     const res = await fetch(
-      `http://localhost:8080/hr/payroll/payslip?empid=${empId}&month=${month}`,
+      `${BASE_API_URL}/hr/payroll/payslip?empid=${empId}&month=${month}`,
       { headers }
     );
 
@@ -110,7 +111,7 @@ const PayrollData = () => {
 
 
   const fetchMonths = async () => {
-  const res = await fetch("http://localhost:8080/hr/payroll/months", { headers });
+  const res = await fetch(`${BASE_API_URL}/hr/payroll/months`, { headers });
   if (res.ok) {
     const data = await res.json();
     setMonths(data);
@@ -121,7 +122,7 @@ const PayrollData = () => {
     };
     const fetchPayrollLock = async () => {
   const res = await fetch(
-    `http://localhost:8080/hr/payroll/lock?month=${month}`,
+    `${BASE_API_URL}/hr/payroll/lock?month=${month}`,
     { headers }
   );
   if (res.ok) {

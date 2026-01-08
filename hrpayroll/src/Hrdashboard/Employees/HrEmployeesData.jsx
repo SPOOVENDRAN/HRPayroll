@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import Employees from "./Employees";
+export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 const HrEmployeesData = () => {
   const [employees, setEmployees] = useState([]);
@@ -13,7 +14,7 @@ const HrEmployeesData = () => {
     const token = localStorage.getItem("token");
 
     fetch(
-      `http://localhost:8080/hr/employees?page=${page}&size=${size}&sortBy=id&sortDir=asc`,
+      `${BASE_API_URL}/hr/employees?page=${page}&size=${size}&sortBy=id&sortDir=asc`,
       {
         headers: {
           Authorization: `Bearer ${token}`,

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import EmployeeLeaves from "./EmployeeLeaves";
+export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 function EmployeeLeavesData() {
 
@@ -10,7 +11,7 @@ function EmployeeLeavesData() {
     const token = localStorage.getItem("token");
     setLoading(true);
 
-    fetch("http://localhost:8080/employee/leaves", {
+    fetch(`${BASE_API_URL}/employee/leaves`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

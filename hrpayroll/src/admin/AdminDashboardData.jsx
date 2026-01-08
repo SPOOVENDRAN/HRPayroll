@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import AdminDashboard from "./AdminDashboard";
+export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 const AdminDashboardData = () => {
 
@@ -23,10 +24,10 @@ const AdminDashboardData = () => {
   const fetchAll = async () => {
     try {
       const [o, e, h, a] = await Promise.all([
-        fetch("http://localhost:8080/admin/dashboard/overview", { headers }),
-        fetch("http://localhost:8080/admin/employees", { headers }),
-        fetch("http://localhost:8080/admin/users/hr", { headers }),
-        fetch("http://localhost:8080/admin/users/admin", { headers })
+        fetch(`${BASE_API_URL}/admin/dashboard/overview`, { headers }),
+        fetch(`${BASE_API_URL}/admin/employees`, { headers }),
+        fetch(`${BASE_API_URL}/admin/users/hr`, { headers }),
+        fetch(`${BASE_API_URL}/admin/users/admin`, { headers })
       ]);
 
       if (!o.ok || !e.ok || !h.ok || !a.ok) {
@@ -82,7 +83,7 @@ setAdmins(
 
   /* -------------------- ADD USER -------------------- */
   const addUser = async (payload) => {
-    await fetch("http://localhost:8080/admin/users", {
+    await fetch(`${BASE_API_URL}/admin/users`, {
       method: "POST",
       headers,
       body: JSON.stringify(payload)
@@ -92,7 +93,7 @@ setAdmins(
 
   /* -------------------- UPDATE EMPLOYEE -------------------- */
   const updateEmployee = async (id, payload) => {
-    await fetch(`http://localhost:8080/admin/employees/${id}`, {
+    await fetch(`${BASE_API_URL}/admin/employees/${id}`, {
       method: "PUT",
       headers,
       body: JSON.stringify(payload)
@@ -103,7 +104,7 @@ setAdmins(
   /* -------------------- TOGGLE STATUS -------------------- */
   const toggleEmployeeStatus = async (id, status) => {
     await fetch(
-      `http://localhost:8080/admin/employees/${id}/status?status=${status}`,
+      `${BASE_API_URL}/admin/employees/${id}/status?status=${status}`,
       { method: "PUT", headers }
     );
     fetchAll();
@@ -111,7 +112,7 @@ setAdmins(
 
   /* -------------------- SOFT DELETE -------------------- */
   const deleteEmployee = async (id) => {
-    await fetch(`http://localhost:8080/admin/employees/${id}`, {
+    await fetch(`${BASE_API_URL}/admin/employees/${id}`, {
       method: "DELETE",
       headers
     });
@@ -119,13 +120,13 @@ setAdmins(
   };
   const toggleHrStatus = async (id, active) => {
   await fetch(
-    `http://localhost:8080/admin/users/${id}/status?active=${active}`,
+    `${BASE_API_URL}/admin/users/${id}/status?active=${active}`,
     { method: "PUT", headers }
   );
   fetchAll();
 };
 const updateHrOrAdmin = async (id, payload) => {
-  await fetch(`http://localhost:8080/admin/users/${id}`, {
+  await fetch(`${BASE_API_URL}/admin/users/${id}`, {
     method: "PUT",
     headers,
     body: JSON.stringify(payload)

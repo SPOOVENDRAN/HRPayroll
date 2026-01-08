@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 
 const EmployeesOverviewData = ({ children }) => {
   const [employees, setEmployees] = useState([]);
@@ -6,7 +7,7 @@ const EmployeesOverviewData = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    fetch("http://localhost:8080/hr/employees/overview", {
+    fetch(`${BASE_API_URL}/hr/employees/overview`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
