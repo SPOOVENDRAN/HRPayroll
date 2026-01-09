@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./EmployeeLeaves.css";
-
+export const BASE_API_URL = import.meta.env.VITE_BASE_API_URL;
 const EmployeeLeaves = ({
   leaveBalances = [],
   leaveApplications = [],
@@ -57,7 +57,7 @@ const EmployeeLeaves = ({
       emergencyContact: newLeave.contact
     };
 
-    const res = await fetch("http://localhost:8080/employee/apply", {
+    const res = await fetch(`${BASE_API_URL}/employee/apply`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -81,7 +81,7 @@ const EmployeeLeaves = ({
     if (!window.confirm("Cancel this leave request?")) return;
 
     const res = await fetch(
-      `http://localhost:8080/employee/cancel/${id}`,
+      `${BASE_API_URL}/employee/cancel/${id}`,
       {
         method: "PUT",
         headers: {

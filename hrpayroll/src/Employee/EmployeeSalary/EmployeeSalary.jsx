@@ -47,7 +47,7 @@ const EmployeeSalary = ({
   const handleDownloadPayslip = async (month) => {
     try {
       const res = await fetch(
-        `http://localhost:8080/employee/salary/payslip?month=${month}`,
+        `${BASE_API_URL}/employee/salary/payslip?month=${month}`,
         {
           method: "GET",
           headers: {

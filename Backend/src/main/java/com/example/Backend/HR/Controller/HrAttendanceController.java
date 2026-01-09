@@ -11,6 +11,7 @@ import com.example.Backend.HR.Service.HrAttendanceService;
 
 @RestController
 @RequestMapping("/hr/attendance")
+@CrossOrigin(origins = "*")
 public class HrAttendanceController {
 
     private final HrAttendanceService service;

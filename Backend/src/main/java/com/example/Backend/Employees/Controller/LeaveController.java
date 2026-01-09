@@ -11,7 +11,7 @@ import com.example.Backend.security.JwtUtil;
 
 @RestController
 @RequestMapping("/employee")
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "*")
 public class LeaveController {
 
     @Autowired
