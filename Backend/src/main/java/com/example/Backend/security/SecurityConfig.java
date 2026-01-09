@@ -63,20 +63,47 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
 }
 
 
-   @Bean
+//    @Bean
+// public CorsConfigurationSource corsConfigurationSource() {
+
+//     CorsConfiguration config = new CorsConfiguration();
+
+//    
+//     config.setAllowedOriginPatterns(List.of("*"));
+
+//     config.setAllowedMethods(List.of(
+//         "GET", "POST", "PUT", "DELETE", "OPTIONS"
+//     ));
+
+//     config.setAllowedHeaders(List.of(
+//         "Authorization", "Content-Type"
+//     ));
+
+//     config.setAllowCredentials(true);
+
+//     UrlBasedCorsConfigurationSource source =
+//             new UrlBasedCorsConfigurationSource();
+
+//     source.registerCorsConfiguration("/**", config);
+//     return source;
+// }
+@Bean
 public CorsConfigurationSource corsConfigurationSource() {
 
     CorsConfiguration config = new CorsConfiguration();
 
-    // 🔥 THIS IS THE FIX
-    config.setAllowedOriginPatterns(List.of("*"));
+    config.setAllowedOrigins(List.of(
+        "http://localhost:5173",
+        "https://hr-payroll-delta.vercel.app" 
+    ));
 
     config.setAllowedMethods(List.of(
         "GET", "POST", "PUT", "DELETE", "OPTIONS"
     ));
 
     config.setAllowedHeaders(List.of(
-        "Authorization", "Content-Type"
+        "Authorization",
+        "Content-Type"
     ));
 
     config.setAllowCredentials(true);
@@ -87,5 +114,6 @@ public CorsConfigurationSource corsConfigurationSource() {
     source.registerCorsConfiguration("/**", config);
     return source;
 }
+
 
 }
