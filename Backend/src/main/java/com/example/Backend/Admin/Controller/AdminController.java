@@ -19,7 +19,7 @@ public class AdminController {
 
     private final AdminService adminService;
 
-    /* ---------- DASHBOARD ---------- */
+    /*DASHBOARD  */ 
 
     @GetMapping("/dashboard/overview")
     public AdminDashboardOverviewDTO overview() {
